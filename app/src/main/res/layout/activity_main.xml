@@ -1,18 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
     <TextView
+        android:id="@+id/text_view_user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
+        android:text="User Name" />
 
-</android.support.constraint.ConstraintLayout>
+    <Button
+        android:id="@+id/button_sign_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_view_user_name"
+        android:layout_centerHorizontal="true"
+        android:background="@null"
+        android:gravity="center_horizontal"
+        android:text="Sign In with Google"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/button_sign_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_view_user_name"
+        android:layout_centerHorizontal="true"
+        android:background="@null"
+        android:gravity="center_horizontal"
+        android:text="Sign Out"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone" />
+
+</RelativeLayout>
