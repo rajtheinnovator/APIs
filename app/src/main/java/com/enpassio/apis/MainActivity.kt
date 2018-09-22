@@ -47,6 +47,13 @@ class MainActivity : AppCompatActivity() {
         signInButton.setOnClickListener { startSignProcess() }
         signOutButton = findViewById(R.id.button_sign_out)
         signOutButton.setOnClickListener { signOut() }
+
+        val restApiButton: Button = findViewById(R.id.rest_api)
+        restApiButton.setOnClickListener { startRESTApiActivity() }
+    }
+
+    private fun startRESTApiActivity() {
+        startActivity(Intent(this, RestApiActivity::class.java))
     }
 
     private fun startSignProcess() {
@@ -67,6 +74,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+
         try {
             val account = completedTask.getResult(ApiException::class.java)
 

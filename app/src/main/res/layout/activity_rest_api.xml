@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/text_view_label_token"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Token is: "
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/text_view_value_token"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_view_label_token"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorAccent"
+        android:textSize="14sp"
+        tools:text="token value" />
+
+    <Button
+        android:id="@+id/button_refresh_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/text_view_label_token"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="8dp"
+        android:background="@null"
+        android:text="Refresh"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent" />
+
+    <Button
+        android:id="@+id/button_sign_in"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button_refresh_id"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="8dp"
+        android:background="@null"
+        android:text="Sign In"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent" />
+
+    <Button
+        android:id="@+id/button_sign_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button_sign_in"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="8dp"
+        android:background="@null"
+        android:text="Sign out"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/button_disconnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button_sign_out"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="8dp"
+        android:background="@null"
+        android:text="Disconnect"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent" />
+
+</RelativeLayout>

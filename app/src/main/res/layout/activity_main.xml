@@ -11,7 +11,8 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:gravity="center_horizontal"
-        android:text="User Name" />
+        android:text="User Name"
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/button_sign_in"
@@ -24,6 +25,8 @@
         android:text="Sign In with Google"
         android:textAllCaps="false"
         android:textColor="@color/colorAccent"
+        android:layout_margin="4dp"
+        android:textSize="16sp"
         android:visibility="visible" />
 
     <Button
@@ -37,6 +40,21 @@
         android:text="Sign Out"
         android:textAllCaps="false"
         android:textColor="@color/colorAccent"
+        android:layout_margin="4dp"
+        android:textSize="16sp"
         android:visibility="gone" />
+
+    <Button
+        android:id="@+id/rest_api"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button_sign_out"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="4dp"
+        android:background="@null"
+        android:text="Start REST Api activity"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent"
+        android:textSize="16sp" />
 
 </RelativeLayout>
