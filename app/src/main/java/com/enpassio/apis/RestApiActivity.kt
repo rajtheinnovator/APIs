@@ -118,6 +118,7 @@ class RestApiActivity : AppCompatActivity() {
         // ID token. Cross-device single sign on will occur in this branch.
         mGoogleSignInClient?.silentSignIn()
                 ?.addOnCompleteListener(this) { task -> handleSignInResult(task) }
+                ?.addOnCompleteListener(this) { task -> handleSignInResult(task) }
 
     }
 
