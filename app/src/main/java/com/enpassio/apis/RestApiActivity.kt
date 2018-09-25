@@ -1,5 +1,6 @@
 package com.enpassio.apis
 
+
 import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.Nullable
@@ -15,6 +16,9 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 class RestApiActivity : AppCompatActivity() {
@@ -63,6 +67,8 @@ class RestApiActivity : AppCompatActivity() {
 
         // Build GoogleAPIClient with the Google Sign-In API and the above options.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+
+
     }
 
     // [START handle_sign_in_result]
@@ -130,6 +136,8 @@ class RestApiActivity : AppCompatActivity() {
             signIn.visibility = View.GONE
             signOut.visibility = View.VISIBLE
             mRefreshButton.visibility = View.VISIBLE
+
+            fetchUsersData(account)
         } else {
             mIdTokenTextView.text = "null"
 
@@ -138,6 +146,22 @@ class RestApiActivity : AppCompatActivity() {
             signOut.visibility = View.GONE
             mRefreshButton.visibility = View.GONE
         }
+    }
+
+    private fun fetchUsersData(account: GoogleSignInAccount) {
+        val loginService = ServiceGenerator.createService(GmailService::class.java, account.idToken)
+        val call = loginService.getListOfEmails(account.email!!)
+        call.enqueue(object : Callback<ListOfMailIds> {
+            override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
+                val listOfIdsOfMails = response.body()
+                Log.v("my_tag", "data received is: " + listOfIdsOfMails)
+
+            }
+
+            override fun onFailure(call: Call<ListOfMailIds>, t: Throwable) {
+                Log.e("my_tag", "error is: " + t.message)
+            }
+        })
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
