@@ -2,6 +2,7 @@ package com.enpassio.apis
 
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.annotation.Nullable
 import android.support.v7.app.AppCompatActivity
@@ -14,11 +15,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.*
 
 
 class RestApiActivity : AppCompatActivity() {
@@ -35,6 +39,11 @@ class RestApiActivity : AppCompatActivity() {
     lateinit var signIn: Button
     lateinit var signOut: Button
     lateinit var disconnect: Button
+    lateinit var restApiPlayground: Button
+    // Scope for reading user's contacts
+    private val CONTACTS_SCOPE = "https://www.googleapis.com/auth/gmail.readonly"
+    private val redirectUri = "com.enpassio.apis:/redirect_from_gmail"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +61,8 @@ class RestApiActivity : AppCompatActivity() {
         disconnect = findViewById(R.id.button_disconnect)
         disconnect.setOnClickListener { startDisconnection() }
         mRefreshButton.setOnClickListener { refresh() }
+        restApiPlayground = findViewById(R.id.button_rest_api_playground)
+        restApiPlayground.setOnClickListener { playWithRestApi() }
 
 
         // [START configure_signin]
@@ -62,6 +73,7 @@ class RestApiActivity : AppCompatActivity() {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(BuildConfig.GOOGLE_API_CLIENT_ID)
                 .requestEmail()
+                .requestScopes(Scope(CONTACTS_SCOPE))
                 .build()
         // [END configure_signin]
 
@@ -71,12 +83,36 @@ class RestApiActivity : AppCompatActivity() {
 
     }
 
+    private fun playWithRestApi() {
+        val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://accounts.google.com/o/oauth2/v2/auth?prompt=consent&response_type=code&client_id=" + BuildConfig.GOOGLE_API_CLIENT_ID + "&scope=https://www.googleapis.com/auth/gmail.readonly&access_type=offline&Content-Type=application/json"
+                        + "&redirect_uri=" + redirectUri))
+        startActivity(intent)
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        // the intent filter defined in AndroidManifest will handle the return from ACTION_VIEW intent
+        val uri = intent.data
+        if (uri != null && uri.toString().startsWith(redirectUri)) {
+            // use the parameter your API exposes for the code (mostly it's "code")
+            val code = uri.getQueryParameter("code")
+            if (code != null) {
+                // get access token
+                Log.v("my_tag", "code is: " + code)
+            } else if (uri.getQueryParameter("error") != null) {
+                // show an error message here
+            }
+        }
+    }
+
+
     // [START handle_sign_in_result]
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
         try {
             val account = completedTask.getResult(ApiException::class.java)
-            val idToken = account.idToken
-
             // TODO(developer): send ID Token to server and validate
 
             updateUI(account)
@@ -149,19 +185,32 @@ class RestApiActivity : AppCompatActivity() {
     }
 
     private fun fetchUsersData(account: GoogleSignInAccount) {
-        val loginService = ServiceGenerator.createService(GmailService::class.java, account.idToken)
-        val call = loginService.getListOfEmails(account.email!!)
-        call.enqueue(object : Callback<ListOfMailIds> {
-            override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
-                val listOfIdsOfMails = response.body()
-                Log.v("my_tag", "data received is: " + listOfIdsOfMails)
 
-            }
 
-            override fun onFailure(call: Call<ListOfMailIds>, t: Throwable) {
-                Log.e("my_tag", "error is: " + t.message)
+        val credential = GoogleAccountCredential.usingOAuth2(
+                this@RestApiActivity,
+                Collections.singleton(CONTACTS_SCOPE))
+        credential.selectedAccount = account.account
+
+
+        val thread = Thread() {
+            kotlin.run {
+                val loginService = ServiceGenerator.createService(GmailService::class.java, credential.token)
+                val call = loginService.getListOfEmails(account.email!!)
+                call.enqueue(object : Callback<ListOfMailIds> {
+                    override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
+                        val listOfIdsOfMails = response.body()
+                        Log.v("my_tag", "data received is: " + listOfIdsOfMails)
+
+                    }
+
+                    override fun onFailure(call: Call<ListOfMailIds>, t: Throwable) {
+                        Log.e("my_tag", "error is: " + t.message)
+                    }
+                })
             }
-        })
+        }
+        thread.start()
     }
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

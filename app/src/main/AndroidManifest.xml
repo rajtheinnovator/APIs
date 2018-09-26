@@ -20,7 +20,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RestApiActivity" />
+        <activity android:name=".RestApiActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="redirect_from_gmail"
+                    android:scheme="com.enpassio.apis" />
+            </intent-filter>
+
+
+        </activity>
     </application>
 
 </manifest>
