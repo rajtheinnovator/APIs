@@ -27,9 +27,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="redirect_from_gmail"
-                    android:scheme="com.enpassio.apis" />
+                <data android:scheme="com.googleusercontent.apps.708222278329-gl6gb1h32s7a13e2mp4mbtg3b6j89744" />
             </intent-filter>
 
 

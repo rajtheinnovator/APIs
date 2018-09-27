@@ -41,9 +41,8 @@ class RestApiActivity : AppCompatActivity() {
     lateinit var disconnect: Button
     lateinit var restApiPlayground: Button
     // Scope for reading user's contacts
-    private val CONTACTS_SCOPE = "https://www.googleapis.com/auth/gmail.readonly"
-    private val redirectUri = "com.enpassio.apis:/redirect_from_gmail"
-
+    private val CONTACTS_SCOPE = "https://mail.google.com/"
+    private val redirectUri = BuildConfig.REDIRECT_URI
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,7 +85,11 @@ class RestApiActivity : AppCompatActivity() {
     private fun playWithRestApi() {
         val intent = Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse("https://accounts.google.com/o/oauth2/v2/auth?prompt=consent&response_type=code&client_id=" + BuildConfig.GOOGLE_API_CLIENT_ID + "&scope=https://www.googleapis.com/auth/gmail.readonly&access_type=offline&Content-Type=application/json"
+                Uri.parse("https://accounts.google.com/o/oauth2/v2/auth?prompt=consent"
+                        + "&response_type=code&client_id="
+                        + BuildConfig.GOOGLE_API_CLIENT_ID
+                        + "&scope=" + CONTACTS_SCOPE
+                        + "&access_type=offline&Content-Type=application/json"
                         + "&redirect_uri=" + redirectUri))
         startActivity(intent)
     }
@@ -99,9 +102,30 @@ class RestApiActivity : AppCompatActivity() {
         if (uri != null && uri.toString().startsWith(redirectUri)) {
             // use the parameter your API exposes for the code (mostly it's "code")
             val code = uri.getQueryParameter("code")
+            Log.v("my_tag", "uri received is: " + uri.toString())
             if (code != null) {
                 // get access token
                 Log.v("my_tag", "code is: " + code)
+                // get access token
+                val loginService = APIClient.client.create(LoginService::class.java)
+
+                val call = loginService.getAccessToken(CONTACTS_SCOPE, code, BuildConfig.GOOGLE_API_CLIENT_ID, redirectUri, "authorization_code")
+
+                call.enqueue(object : Callback<AccessToken> {
+                    override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
+                        val accessToken = response.errorBody().toString()
+                        Log.v("my_tag", "accessToken is: " + response.body()?.accessToken)
+                        Log.v("my_tag", "response.errorBody() is: " + accessToken)
+                        Log.v("my_tag", "response.message() is: " + response.message())
+                        Log.v("my_tag", "response.code() is: " + response.code())
+                        Log.v("my_tag", "response.headers() is: " + response.headers())
+                        Log.v("my_tag", "response.raw() is: " + response.raw())
+                    }
+
+                    override fun onFailure(call: Call<AccessToken>, t: Throwable) {
+                        Log.e("my_tag", "error is: " + t.message)
+                    }
+                })
             } else if (uri.getQueryParameter("error") != null) {
                 // show an error message here
             }

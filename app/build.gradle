@@ -23,6 +23,7 @@ android {
     }
     buildTypes.each {
         it.buildConfigField "String", "GOOGLE_API_CLIENT_ID", clientId
+        it.buildConfigField "String", "REDIRECT_URI", redirectUri
     }
 }
 
@@ -58,5 +59,6 @@ dependencies {
     // RxJava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.2'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'net.openid:appauth:0.2.0'
 
 }
