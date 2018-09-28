@@ -15,6 +15,9 @@ interface LoginService {
 }
 
 interface GmailService {
-    @GET("gmail/v1/users/{userId}/messages/list")
-    fun getListOfEmails(@Path("userId") userId: String): Call<ListOfMailIds>
+    @GET("gmail/v1/users/{userId}/messages")
+    fun getListOfEmails(@Path("userId") userId: String,
+                        @Query("scope") scope: String,
+                        @Query("client_id") client_id: String,
+                        @Query("redirect_uri") redirect_uri: String): Call<ListOfMailIds>
 }

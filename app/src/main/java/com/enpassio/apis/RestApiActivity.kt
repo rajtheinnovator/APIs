@@ -41,7 +41,7 @@ class RestApiActivity : AppCompatActivity() {
     lateinit var disconnect: Button
     lateinit var restApiPlayground: Button
     // Scope for reading user's contacts
-    private val CONTACTS_SCOPE = "https://mail.google.com/"
+    private val CONTACTS_SCOPE = "https://mail.google.com/+https://www.googleapis.com/auth/userinfo.email"
     private val redirectUri = BuildConfig.REDIRECT_URI
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -114,12 +114,31 @@ class RestApiActivity : AppCompatActivity() {
                 call.enqueue(object : Callback<AccessToken> {
                     override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
                         val accessToken = response.errorBody().toString()
-                        Log.v("my_tag", "accessToken is: " + response.body()?.accessToken)
-                        Log.v("my_tag", "response.errorBody() is: " + accessToken)
-                        Log.v("my_tag", "response.message() is: " + response.message())
-                        Log.v("my_tag", "response.code() is: " + response.code())
-                        Log.v("my_tag", "response.headers() is: " + response.headers())
-                        Log.v("my_tag", "response.raw() is: " + response.raw())
+
+
+                        val mailListService = ServiceGenerator.createService(GmailService::class.java, response.body()?.accessToken)
+                        val mailCall = mailListService.getListOfEmails("me", CONTACTS_SCOPE,
+                                BuildConfig.GOOGLE_API_CLIENT_ID,
+                                redirectUri)
+                        mailCall.enqueue(object : Callback<ListOfMailIds> {
+                            override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
+                                val listOfIdsOfMails = response.body()
+                                Log.v("my_tag", "mail data received is: " + listOfIdsOfMails)
+                                Log.v("my_tag", "mail id is: " + listOfIdsOfMails?.messages?.get(0)?.id)
+
+                                Log.v("my_tag", "response.errorBody() is: " + accessToken)
+                                Log.v("my_tag", "response.message() is: " + response.message())
+                                Log.v("my_tag", "response.code() is: " + response.code())
+                                Log.v("my_tag", "response.headers() is: " + response.headers())
+                                Log.v("my_tag", "response.raw() is: " + response.raw())
+
+                            }
+
+                            override fun onFailure(call: Call<ListOfMailIds>, t: Throwable) {
+                                Log.e("my_tag", "error is: " + t.message)
+                            }
+                        })
+
                     }
 
                     override fun onFailure(call: Call<AccessToken>, t: Throwable) {
@@ -220,7 +239,7 @@ class RestApiActivity : AppCompatActivity() {
         val thread = Thread() {
             kotlin.run {
                 val loginService = ServiceGenerator.createService(GmailService::class.java, credential.token)
-                val call = loginService.getListOfEmails(account.email!!)
+                val call = loginService.getListOfEmails(account.email!!, "", "", "")
                 call.enqueue(object : Callback<ListOfMailIds> {
                     override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
                         val listOfIdsOfMails = response.body()
