@@ -7,7 +7,7 @@ class ListOfMailIds {
 
     @SerializedName("messages")
     @Expose
-    var messages: List<Message>? = null
+    var messages: List<MessageWithIdAndThreadId>? = null
     @SerializedName("nextPageToken")
     @Expose
     var nextPageToken: String? = null
@@ -17,7 +17,7 @@ class ListOfMailIds {
 
 }
 
-class Message {
+class MessageWithIdAndThreadId {
 
     @SerializedName("id")
     @Expose

@@ -122,6 +122,7 @@ class RestApiActivity : AppCompatActivity() {
                         getAccessTokenFromRefreshToken(response.body()?.accessToken!!)
 
 
+                        val tokenForUser = response.body()?.accessToken
                         val mailListService = ServiceGenerator.createService(GmailService::class.java, response.body()?.accessToken)
                         val mailCall = mailListService.getListOfEmails("me", CONTACTS_SCOPE,
                                 BuildConfig.GOOGLE_API_CLIENT_ID,
@@ -130,8 +131,14 @@ class RestApiActivity : AppCompatActivity() {
                             override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
                                 val listOfIdsOfMails = response.body()
                                 Log.v("my_tag", "mail data received is: " + listOfIdsOfMails)
-                                /*
+
                                 Log.v("my_tag", "mail id is: " + listOfIdsOfMails?.messages?.get(0)?.id)
+                                getMessageFromMessageList("me", listOfIdsOfMails?.messages?.get(0)?.id,
+                                        CONTACTS_SCOPE,
+                                        BuildConfig.GOOGLE_API_CLIENT_ID,
+                                        redirectUri,
+                                        tokenForUser)
+                                /*
 
                                 Log.v("my_tag", "response.errorBody() is: " + accessToken)
                                 Log.v("my_tag", "response.message() is: " + response.message())
@@ -157,6 +164,38 @@ class RestApiActivity : AppCompatActivity() {
                 // show an error message here
             }
         }
+    }
+
+    private fun getMessageFromMessageList(userId: String, messageId: String?, scope: String, client_ID: String, redirectUri: String, tokenForUser: String?) {
+        val singleMessageService = ServiceGenerator.createService(ParticularItemService::class.java, tokenForUser)
+        val singleMessageCall = singleMessageService.getParticularEmail("me", messageId!!, scope,
+                client_ID,
+                redirectUri)
+        singleMessageCall.enqueue(object : Callback<Message> {
+            override fun onFailure(call: Call<Message>, t: Throwable) {
+
+                Log.v("my_tag", "fail message is: " + t.message.toString())
+            }
+
+            override fun onResponse(call: Call<Message>, response: Response<Message>) {
+
+                Log.v("my_tag", "response.errorBody() is: " + response.errorBody())
+                Log.v("my_tag", "response.message() is: " + response.message())
+                Log.v("my_tag", "response.code() is: " + response.code())
+                Log.v("my_tag", "response.headers() is: " + response.headers())
+                Log.v("my_tag", "response.raw() is: " + response.raw())
+
+                Log.v("my_tag", "internalDate received: " + response.body()?.internalDate)
+                /*
+                val headers = response.body()?.payload?.headers!!
+                for (item in headers){
+                    Log.v("my_tag", "message received: "+item.name)
+                }
+                */
+
+            }
+        })
+
     }
 
     private fun getAccessTokenFromRefreshToken(refreshToken: String) {

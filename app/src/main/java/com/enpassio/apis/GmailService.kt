@@ -30,3 +30,13 @@ interface GmailService {
                         @Query("client_id") client_id: String,
                         @Query("redirect_uri") redirect_uri: String): Call<ListOfMailIds>
 }
+
+interface ParticularItemService {
+    @GET("gmail/v1/users/{userId}/messages/{id}")
+    fun getParticularEmail(@Path("userId") userId: String,
+                           @Path("id") messageId: String,
+                           @Query("scope") scope: String,
+                           @Query("client_id") client_id: String,
+                           @Query("redirect_uri") redirect_uri: String
+    ): Call<Message>
+}
