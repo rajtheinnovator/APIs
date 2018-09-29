@@ -3,14 +3,23 @@ package com.enpassio.apis
 import retrofit2.Call
 import retrofit2.http.*
 
-interface LoginService {
+interface TokenService {
     @FormUrlEncoded
     @POST("/oauth2/v4/token/")
-    fun getAccessToken(
+    fun getAccessTokenFromAuthCode(
             @Field("scope") scope: String,
             @Field("code") code: String,
             @Field("client_id") client_id: String,
             @Field("redirect_uri") redirect_uri: String,
+            @Field("grant_type") grant_type: String): Call<AccessToken>
+}
+
+interface RefreshTokenService {
+    @FormUrlEncoded
+    @POST("/oauth2/v4/token/")
+    fun getAccessTokenFromRfreshToken(
+            @Field("refresh_token") refreshToken: String,
+            @Field("client_id") client_id: String,
             @Field("grant_type") grant_type: String): Call<AccessToken>
 }
 

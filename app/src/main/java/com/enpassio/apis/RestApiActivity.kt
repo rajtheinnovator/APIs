@@ -107,13 +107,19 @@ class RestApiActivity : AppCompatActivity() {
                 // get access token
                 Log.v("my_tag", "code is: " + code)
                 // get access token
-                val loginService = APIClient.client.create(LoginService::class.java)
+                val loginService = APIClient.client.create(TokenService::class.java)
 
-                val call = loginService.getAccessToken(CONTACTS_SCOPE, code, BuildConfig.GOOGLE_API_CLIENT_ID, redirectUri, "authorization_code")
+                val call =
+                        loginService.getAccessTokenFromAuthCode(CONTACTS_SCOPE,
+                                code,
+                                BuildConfig.GOOGLE_API_CLIENT_ID,
+                                redirectUri,
+                                "authorization_code")
 
                 call.enqueue(object : Callback<AccessToken> {
                     override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
-                        val accessToken = response.errorBody().toString()
+
+                        getAccessTokenFromRefreshToken(response.body()?.accessToken!!)
 
 
                         val mailListService = ServiceGenerator.createService(GmailService::class.java, response.body()?.accessToken)
@@ -124,6 +130,7 @@ class RestApiActivity : AppCompatActivity() {
                             override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
                                 val listOfIdsOfMails = response.body()
                                 Log.v("my_tag", "mail data received is: " + listOfIdsOfMails)
+                                /*
                                 Log.v("my_tag", "mail id is: " + listOfIdsOfMails?.messages?.get(0)?.id)
 
                                 Log.v("my_tag", "response.errorBody() is: " + accessToken)
@@ -131,6 +138,7 @@ class RestApiActivity : AppCompatActivity() {
                                 Log.v("my_tag", "response.code() is: " + response.code())
                                 Log.v("my_tag", "response.headers() is: " + response.headers())
                                 Log.v("my_tag", "response.raw() is: " + response.raw())
+                                */
 
                             }
 
@@ -149,6 +157,25 @@ class RestApiActivity : AppCompatActivity() {
                 // show an error message here
             }
         }
+    }
+
+    private fun getAccessTokenFromRefreshToken(refreshToken: String) {
+        val refreshTokenService = APIClient.client.create(RefreshTokenService::class.java)
+
+        val call =
+                refreshTokenService.getAccessTokenFromRfreshToken(
+                        refreshToken,
+                        BuildConfig.GOOGLE_API_CLIENT_ID,
+                        "refresh_token")
+        call.enqueue(object : Callback<AccessToken> {
+            override fun onFailure(call: Call<AccessToken>, t: Throwable) {
+
+            }
+
+            override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
+                Log.v("my_tag", "token from refresh token is :" + response.body()?.accessToken)
+            }
+        })
     }
 
 
