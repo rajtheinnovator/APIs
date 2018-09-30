@@ -2,9 +2,11 @@ package com.enpassio.apis
 
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.support.annotation.Nullable
+import android.support.customtabs.CustomTabsIntent
 import android.support.v7.app.AppCompatActivity
 import android.util.Base64
 import android.util.Log
@@ -26,6 +28,8 @@ import com.linkedin.urls.detection.UrlDetectorOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import saschpe.android.customtabs.CustomTabsHelper
+import saschpe.android.customtabs.WebViewFallback
 import java.util.*
 
 class RestApiActivity : AppCompatActivity() {
@@ -86,15 +90,30 @@ class RestApiActivity : AppCompatActivity() {
     }
 
     private fun playWithRestApi() {
-        val intent = Intent(
-                Intent.ACTION_VIEW,
+
+        val icon = BitmapFactory.decodeResource(getResources(),
+                R.drawable.back);
+        val customTabsIntent = CustomTabsIntent.Builder()
+                .addDefaultShareMenuItem()
+                .setToolbarColor(this.getResources()
+                        .getColor(R.color.colorPrimary))
+                .setShowTitle(true)
+                .setCloseButtonIcon(icon)
+                .build()
+
+        // This is optional but recommended
+        CustomTabsHelper.addKeepAliveExtra(this, customTabsIntent.intent);
+
+        // This is where the magic happens...
+        CustomTabsHelper.openCustomTab(this, customTabsIntent,
                 Uri.parse("https://accounts.google.com/o/oauth2/v2/auth?prompt=consent"
                         + "&response_type=code&client_id="
                         + BuildConfig.GOOGLE_API_CLIENT_ID
                         + "&scope=" + CONTACTS_SCOPE
                         + "&access_type=offline&Content-Type=application/json"
-                        + "&redirect_uri=" + redirectUri))
-        startActivity(intent)
+                        + "&redirect_uri=" + redirectUri),
+                WebViewFallback());
+
     }
 
 
@@ -238,7 +257,7 @@ class RestApiActivity : AppCompatActivity() {
                 }
                 val mailBody = Base64.decode(encodedData.trim(), Base64.DEFAULT)
                 Log.v("my_tag", "actual message is: " + String(mailBody, Charsets.UTF_8))
-                
+
                 val urlParser = UrlDetector(String(mailBody, Charsets.UTF_8), UrlDetectorOptions.HTML);
                 val detectedUrl = urlParser.detect().get(0).toString()
 

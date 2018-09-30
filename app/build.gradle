@@ -64,5 +64,8 @@ dependencies {
     // https://mvnrepository.com/artifact/com.linkedin.urls/url-detector
     implementation group: 'com.linkedin.urls', name: 'url-detector', version: '0.1.17'
 
+    //chrome custom tabs
+    implementation 'saschpe.android:customtabs:1.1.2'
+
 
 }
