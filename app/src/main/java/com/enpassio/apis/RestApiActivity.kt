@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.annotation.Nullable
 import android.support.v7.app.AppCompatActivity
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -19,6 +20,7 @@ import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.util.DateTime
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -211,15 +213,30 @@ class RestApiActivity : AppCompatActivity() {
                 }
 
                 Log.v("my_tag", "from : " + from)
+                Log.v("my_tag", "decoded from : " + java.net.URLDecoder.decode(from, "UTF-8"))
                 Log.v("my_tag", "subject: " + subject)
-                Log.v("my_tag", "messageCreationTime: " + date)
+                Log.v("my_tag", "messageCreationTime in epoch is: " + date)
+
+                val time = DateTime(date?.toLong()!!)
+                Log.v("my_tag", "Time instance in local time-zone is :" + time)
+               
                 val partsInPayload = payload.parts
+                Log.v("my_tag", "parts is: " + partsInPayload)
 
-                if (partsInPayload?.isNotEmpty()!!)
-                    Log.v("my_tag", "encoded size : " + partsInPayload.get(0).body?.size)
-                encodedData = partsInPayload.get(0).body?.data!!
 
-                Log.v("my_tag", "encoded data: " + encodedData)
+                if (partsInPayload != null) {
+                    Log.v("my_tag", "encoded size : " + partsInPayload.get(1).body?.size)
+                    for (body in partsInPayload) {
+                        if (body.mimeType.equals("text/plain")) {
+                            encodedData = body.body?.data!!
+                            Log.v("my_tag", "encoded data: " + encodedData)
+                        }
+                    }
+                }
+                val mailBody = Base64.decode(encodedData, Base64.DEFAULT)
+                Log.v("my_tag", "actual message is: " + String(mailBody, Charsets.UTF_8))
+
+                Log.v("my_tag", "_________________________________________")
 
 
             }
