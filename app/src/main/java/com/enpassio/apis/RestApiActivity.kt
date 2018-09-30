@@ -24,7 +24,6 @@ import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 
-
 class RestApiActivity : AppCompatActivity() {
 
 
@@ -105,7 +104,9 @@ class RestApiActivity : AppCompatActivity() {
             Log.v("my_tag", "uri received is: " + uri.toString())
             if (code != null) {
                 // get access token
+                /*
                 Log.v("my_tag", "code is: " + code)
+                */
                 // get access token
                 val loginService = APIClient.client.create(TokenService::class.java)
 
@@ -130,9 +131,11 @@ class RestApiActivity : AppCompatActivity() {
                         mailCall.enqueue(object : Callback<ListOfMailIds> {
                             override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
                                 val listOfIdsOfMails = response.body()
+                                /*
                                 Log.v("my_tag", "mail data received is: " + listOfIdsOfMails)
 
                                 Log.v("my_tag", "mail id is: " + listOfIdsOfMails?.messages?.get(0)?.id)
+                                */
                                 getMessageFromMessageList("me", listOfIdsOfMails?.messages?.get(0)?.id,
                                         CONTACTS_SCOPE,
                                         BuildConfig.GOOGLE_API_CLIENT_ID,
@@ -179,6 +182,7 @@ class RestApiActivity : AppCompatActivity() {
 
             override fun onResponse(call: Call<Message>, response: Response<Message>) {
 
+                /*
                 Log.v("my_tag", "response.errorBody() is: " + response.errorBody())
                 Log.v("my_tag", "response.message() is: " + response.message())
                 Log.v("my_tag", "response.code() is: " + response.code())
@@ -186,12 +190,37 @@ class RestApiActivity : AppCompatActivity() {
                 Log.v("my_tag", "response.raw() is: " + response.raw())
 
                 Log.v("my_tag", "internalDate received: " + response.body()?.internalDate)
-                /*
-                val headers = response.body()?.payload?.headers!!
-                for (item in headers){
-                    Log.v("my_tag", "message received: "+item.name)
-                }
                 */
+                val date = response.body()?.internalDate
+                var from = ""
+                var subject = ""
+                var encodedData = ""
+
+
+                val payload: PayloadInMessage = response.body()?.payload!!
+                val headersInsidePayload = payload.headers
+
+                for (item in headersInsidePayload!!) {
+
+                    val name = item.name
+                    if (name.equals("From")) {
+                        from = item.value!!
+                    } else if (name.equals("Subject")) {
+                        subject = item.value!!
+                    }
+                }
+
+                Log.v("my_tag", "from : " + from)
+                Log.v("my_tag", "subject: " + subject)
+                Log.v("my_tag", "messageCreationTime: " + date)
+                val partsInPayload = payload.parts
+
+                if (partsInPayload?.isNotEmpty()!!)
+                    Log.v("my_tag", "encoded size : " + partsInPayload.get(0).body?.size)
+                encodedData = partsInPayload.get(0).body?.data!!
+
+                Log.v("my_tag", "encoded data: " + encodedData)
+
 
             }
         })

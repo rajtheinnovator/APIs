@@ -24,7 +24,7 @@ class Message {
     var internalDate: String? = null
     @SerializedName("payload")
     @Expose
-    var payload: Payload? = null
+    var payload: PayloadInMessage? = null
     @SerializedName("sizeEstimate")
     @Expose
     var sizeEstimate: Int? = null
@@ -93,7 +93,7 @@ class Part {
 
 }
 
-class Payload {
+class PayloadInMessage {
 
     @SerializedName("partId")
     @Expose
