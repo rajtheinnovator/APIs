@@ -21,6 +21,8 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.DateTime
+import com.linkedin.urls.detection.UrlDetector
+import com.linkedin.urls.detection.UrlDetectorOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -219,7 +221,7 @@ class RestApiActivity : AppCompatActivity() {
 
                 val time = DateTime(date?.toLong()!!)
                 Log.v("my_tag", "Time instance in local time-zone is :" + time)
-               
+
                 val partsInPayload = payload.parts
                 Log.v("my_tag", "parts is: " + partsInPayload)
 
@@ -230,11 +232,18 @@ class RestApiActivity : AppCompatActivity() {
                         if (body.mimeType.equals("text/plain")) {
                             encodedData = body.body?.data!!
                             Log.v("my_tag", "encoded data: " + encodedData)
+
                         }
                     }
                 }
-                val mailBody = Base64.decode(encodedData, Base64.DEFAULT)
+                val mailBody = Base64.decode(encodedData.trim(), Base64.DEFAULT)
                 Log.v("my_tag", "actual message is: " + String(mailBody, Charsets.UTF_8))
+                
+                val urlParser = UrlDetector(String(mailBody, Charsets.UTF_8), UrlDetectorOptions.HTML);
+                val detectedUrl = urlParser.detect().get(0).toString()
+
+                val emailParser = UrlDetector(from, UrlDetectorOptions.HTML);
+                val detectedMailFrom = emailParser.detect().get(0).toString()
 
                 Log.v("my_tag", "_________________________________________")
 
