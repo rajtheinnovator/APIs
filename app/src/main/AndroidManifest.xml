@@ -34,6 +34,7 @@
         </activity>
 
         <receiver android:name=".alarm.AlarmToneReceiver" />
+        <receiver android:name=".alarm.AlarmApiCallReceiver" />
     </application>
 
 </manifest>

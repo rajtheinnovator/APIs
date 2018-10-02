@@ -1,6 +1,7 @@
 package com.enpassio.apis
 
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.MediaPlayer
@@ -10,7 +11,6 @@ import android.os.Bundle
 import android.support.annotation.Nullable
 import android.support.customtabs.CustomTabsIntent
 import android.support.v7.app.AppCompatActivity
-import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -25,8 +25,6 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.util.DateTime
-import com.linkedin.urls.detection.UrlDetector
-import com.linkedin.urls.detection.UrlDetectorOptions
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -73,7 +71,8 @@ class RestApiActivity : AppCompatActivity() {
         disconnect.setOnClickListener { startDisconnection() }
         mRefreshButton.setOnClickListener { refresh() }
         restApiPlayground = findViewById(R.id.button_rest_api_playground)
-        restApiPlayground.setOnClickListener { playWithRestApi() }
+        restApiPlayground.setOnClickListener { checkIfTokenIsAvailable() }
+
 
         val alarmButton: Button = findViewById(R.id.button_ring_alarm)
         val notification: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
@@ -81,8 +80,13 @@ class RestApiActivity : AppCompatActivity() {
         alarmButton.setOnClickListener {
             ringAlarm()
         }
-        ringAlarm()
-
+        //ringAlarm()
+        if (intent != null)
+            if (intent.hasExtra("extra_bundle")) {
+                if (intent.getBundleExtra("extra_bundle").get("extra_api").equals("extra_api")) {
+                    checkIfTokenIsAvailable()
+                }
+            }
 
         // [START configure_signin]
         // Request only the user's ID token, which can be used to identify the
@@ -100,6 +104,20 @@ class RestApiActivity : AppCompatActivity() {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
     }
 
+    //check if token exist already or not and act accordingly
+    private fun checkIfTokenIsAvailable() {
+        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        val token = sharedPref.getString("token", "")!!
+        if (token.isEmpty())
+            setupTokenWithRestApi()
+        else
+            getAccessTokenFromRefreshToken(token)
+        if (!token.isEmpty()) {
+            getListOfMail(token)
+        }
+    }
+
+
     private fun ringAlarm() {
         if (player?.isPlaying!!) {
             player?.stop()
@@ -110,8 +128,7 @@ class RestApiActivity : AppCompatActivity() {
         }
     }
 
-    private fun playWithRestApi() {
-
+    private fun setupTokenWithRestApi() {
         val icon = BitmapFactory.decodeResource(getResources(),
                 R.drawable.back);
         val customTabsIntent = CustomTabsIntent.Builder()
@@ -163,45 +180,7 @@ class RestApiActivity : AppCompatActivity() {
 
                 call.enqueue(object : Callback<AccessToken> {
                     override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
-
-
-                        getAccessTokenFromRefreshToken(response.body()?.accessToken!!)
-
-
-                        val tokenForUser = response.body()?.accessToken
-                        val mailListService = ServiceGenerator.createService(GmailService::class.java, response.body()?.accessToken)
-                        val mailCall = mailListService.getListOfEmails("me", CONTACTS_SCOPE,
-                                BuildConfig.GOOGLE_API_CLIENT_ID,
-                                redirectUri)
-                        mailCall.enqueue(object : Callback<ListOfMailIds> {
-                            override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
-                                val listOfIdsOfMails = response.body()
-                                /*
-                                Log.v("my_tag", "mail data received is: " + listOfIdsOfMails)
-
-                                Log.v("my_tag", "mail id is: " + listOfIdsOfMails?.messages?.get(0)?.id)
-                                */
-                                getMessageFromMessageList("me", listOfIdsOfMails?.messages?.get(0)?.id,
-                                        CONTACTS_SCOPE,
-                                        BuildConfig.GOOGLE_API_CLIENT_ID,
-                                        redirectUri,
-                                        tokenForUser)
-                                /*
-
-                                Log.v("my_tag", "response.errorBody() is: " + accessToken)
-                                Log.v("my_tag", "response.message() is: " + response.message())
-                                Log.v("my_tag", "response.code() is: " + response.code())
-                                Log.v("my_tag", "response.headers() is: " + response.headers())
-                                Log.v("my_tag", "response.raw() is: " + response.raw())
-                                */
-
-                            }
-
-                            override fun onFailure(call: Call<ListOfMailIds>, t: Throwable) {
-                                Log.e("my_tag", "error is: " + t.message)
-                            }
-                        })
-
+                        saveTokenToSharedPreference(response)
                     }
 
                     override fun onFailure(call: Call<AccessToken>, t: Throwable) {
@@ -211,6 +190,57 @@ class RestApiActivity : AppCompatActivity() {
             } else if (uri.getQueryParameter("error") != null) {
                 // show an error message here
             }
+        }
+    }
+
+    private fun getListOfMail(response: String) {
+        val tokenForUser = response
+        val mailListService = ServiceGenerator.createService(GmailService::class.java, tokenForUser)
+        val mailCall = mailListService.getListOfEmails("me", CONTACTS_SCOPE,
+                BuildConfig.GOOGLE_API_CLIENT_ID,
+                redirectUri)
+        mailCall.enqueue(object : Callback<ListOfMailIds> {
+            override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
+                val listOfIdsOfMails = response.body()
+                /*
+                Log.v("my_tag", "mail data received is: " + listOfIdsOfMails)
+
+                Log.v("my_tag", "mail id is: " + listOfIdsOfMails?.messages?.get(0)?.id)
+                */
+                var count = 0
+                for (singleMessage in listOfIdsOfMails?.messages!!) {
+                    count = count + 1
+                    getMessageFromMessageList("me", singleMessage.id,
+                            CONTACTS_SCOPE,
+                            BuildConfig.GOOGLE_API_CLIENT_ID,
+                            redirectUri,
+                            tokenForUser)
+                    if (count == 5)
+                        break
+                }
+                /*
+
+                Log.v("my_tag", "response.errorBody() is: " + accessToken)
+                Log.v("my_tag", "response.message() is: " + response.message())
+                Log.v("my_tag", "response.code() is: " + response.code())
+                Log.v("my_tag", "response.headers() is: " + response.headers())
+                Log.v("my_tag", "response.raw() is: " + response.raw())
+                */
+
+            }
+
+            override fun onFailure(call: Call<ListOfMailIds>, t: Throwable) {
+                Log.e("my_tag", "error is: " + t.message)
+            }
+        })
+    }
+
+    private fun saveTokenToSharedPreference(accessTokenResponse: Response<AccessToken>) {
+        // save token
+        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putString("token", accessTokenResponse.body()?.accessToken)
+            apply()
         }
     }
 
@@ -255,20 +285,22 @@ class RestApiActivity : AppCompatActivity() {
                     }
                 }
 
+                /*
                 Log.v("my_tag", "from : " + from)
                 Log.v("my_tag", "decoded from : " + java.net.URLDecoder.decode(from, "UTF-8"))
                 Log.v("my_tag", "subject: " + subject)
                 Log.v("my_tag", "messageCreationTime in epoch is: " + date)
 
+                */
                 val time = DateTime(date?.toLong()!!)
-                Log.v("my_tag", "Time instance in local time-zone is :" + time)
+                //Log.v("my_tag", "Time instance in local time-zone is :" + time)
 
                 val partsInPayload = payload.parts
-                Log.v("my_tag", "parts is: " + partsInPayload)
+                //Log.v("my_tag", "parts is: " + partsInPayload)
 
 
                 if (partsInPayload != null) {
-                    Log.v("my_tag", "encoded size : " + partsInPayload.get(1).body?.size)
+                    //    Log.v("my_tag", "encoded size : " + partsInPayload.get(1).body?.size)
                     for (body in partsInPayload) {
                         if (body.mimeType.equals("text/plain")) {
                             encodedData = body.body?.data!!
@@ -277,6 +309,7 @@ class RestApiActivity : AppCompatActivity() {
                         }
                     }
                 }
+                /*
                 val mailBody = Base64.decode(encodedData.trim(), Base64.DEFAULT)
                 Log.v("my_tag", "actual message is: " + String(mailBody, Charsets.UTF_8))
 
@@ -286,6 +319,7 @@ class RestApiActivity : AppCompatActivity() {
                 val emailParser = UrlDetector(from, UrlDetectorOptions.HTML);
                 val detectedMailFrom = emailParser.detect().get(0).toString()
 
+                */
                 Log.v("my_tag", "_________________________________________")
 
 
@@ -312,7 +346,6 @@ class RestApiActivity : AppCompatActivity() {
             }
         })
     }
-
 
     // [START handle_sign_in_result]
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
@@ -390,7 +423,6 @@ class RestApiActivity : AppCompatActivity() {
     }
 
     private fun fetchUsersData(account: GoogleSignInAccount) {
-
 
         val credential = GoogleAccountCredential.usingOAuth2(
                 this@RestApiActivity,
