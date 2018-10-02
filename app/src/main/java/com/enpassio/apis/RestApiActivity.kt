@@ -3,6 +3,8 @@ package com.enpassio.apis
 
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.support.annotation.Nullable
@@ -51,6 +53,7 @@ class RestApiActivity : AppCompatActivity() {
     private val CONTACTS_SCOPE = "https://mail.google.com/+https://www.googleapis.com/auth/userinfo.email"
     private val redirectUri = BuildConfig.REDIRECT_URI
 
+    var player: MediaPlayer? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_rest_api)
@@ -70,6 +73,13 @@ class RestApiActivity : AppCompatActivity() {
         restApiPlayground = findViewById(R.id.button_rest_api_playground)
         restApiPlayground.setOnClickListener { playWithRestApi() }
 
+        val alarmButton: Button = findViewById(R.id.button_ring_alarm)
+        val notification: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        player = MediaPlayer.create(this@RestApiActivity, notification)
+        alarmButton.setOnClickListener {
+            ringAlarm()
+        }
+
 
         // [START configure_signin]
         // Request only the user's ID token, which can be used to identify the
@@ -87,6 +97,16 @@ class RestApiActivity : AppCompatActivity() {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
 
 
+    }
+
+    private fun ringAlarm() {
+        if (player?.isPlaying!!) {
+            player?.stop()
+        } else {
+            val notification: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+            player = MediaPlayer.create(this@RestApiActivity, notification)
+            player?.start()
+        }
     }
 
     private fun playWithRestApi() {

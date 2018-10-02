@@ -40,7 +40,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/button_refresh_id"
         android:layout_centerHorizontal="true"
-        android:layout_margin="8dp"
         android:background="@null"
         android:text="Sign In"
         android:textAllCaps="false"
@@ -52,7 +51,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/button_sign_in"
         android:layout_centerHorizontal="true"
-        android:layout_margin="8dp"
         android:background="@null"
         android:text="Sign out"
         android:textAllCaps="false"
@@ -65,7 +63,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/button_sign_out"
         android:layout_centerHorizontal="true"
-        android:layout_margin="8dp"
         android:background="@null"
         android:text="Disconnect"
         android:textAllCaps="false"
@@ -80,6 +77,18 @@
         android:layout_margin="16dp"
         android:background="@null"
         android:text="Play with REST api"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent" />
+
+    <Button
+        android:id="@+id/button_ring_alarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button_rest_api_playground"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
+        android:background="@null"
+        android:text="Ring alarm"
         android:textAllCaps="false"
         android:textColor="@color/colorAccent" />
 
