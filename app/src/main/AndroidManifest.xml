@@ -32,6 +32,8 @@
 
 
         </activity>
+
+        <receiver android:name=".alarm.AlarmToneReceiver" />
     </application>
 
 </manifest>

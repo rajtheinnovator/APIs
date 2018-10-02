@@ -54,6 +54,8 @@ class RestApiActivity : AppCompatActivity() {
     private val redirectUri = BuildConfig.REDIRECT_URI
 
     var player: MediaPlayer? = null
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_rest_api)
@@ -79,6 +81,7 @@ class RestApiActivity : AppCompatActivity() {
         alarmButton.setOnClickListener {
             ringAlarm()
         }
+        ringAlarm()
 
 
         // [START configure_signin]
@@ -95,8 +98,6 @@ class RestApiActivity : AppCompatActivity() {
 
         // Build GoogleAPIClient with the Google Sign-In API and the above options.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
-
-
     }
 
     private fun ringAlarm() {
@@ -162,6 +163,7 @@ class RestApiActivity : AppCompatActivity() {
 
                 call.enqueue(object : Callback<AccessToken> {
                     override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
+
 
                         getAccessTokenFromRefreshToken(response.body()?.accessToken!!)
 
