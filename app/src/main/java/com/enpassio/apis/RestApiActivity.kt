@@ -3,6 +3,7 @@ package com.enpassio.apis
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.media.RingtoneManager
@@ -24,7 +25,6 @@ import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
-import com.google.api.client.util.DateTime
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -80,13 +80,7 @@ class RestApiActivity : AppCompatActivity() {
         alarmButton.setOnClickListener {
             ringAlarm()
         }
-        //ringAlarm()
-        if (intent != null)
-            if (intent.hasExtra("extra_bundle")) {
-                if (intent.getBundleExtra("extra_bundle").get("extra_api").equals("extra_api")) {
-                    checkIfTokenIsAvailable()
-                }
-            }
+        //checkIfTokenIsAvailable()
 
         // [START configure_signin]
         // Request only the user's ID token, which can be used to identify the
@@ -106,15 +100,17 @@ class RestApiActivity : AppCompatActivity() {
 
     //check if token exist already or not and act accordingly
     private fun checkIfTokenIsAvailable() {
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        val token = sharedPref.getString("token", "")!!
+//        val sharedPref = getPreferences(Context.MODE_PRIVATE)
+//        val token = sharedPref.getString("token", "")!!
+
+        val settings = getSharedPreferences("token", Context.MODE_PRIVATE)
+        val token = settings.getString("token", "")!!
+
         if (token.isEmpty())
             setupTokenWithRestApi()
         else
             getAccessTokenFromRefreshToken(token)
-        if (!token.isEmpty()) {
-            getListOfMail(token)
-        }
+        Log.v("my_tag", "token inside restApiActivity is: " + token)
     }
 
 
@@ -193,140 +189,21 @@ class RestApiActivity : AppCompatActivity() {
         }
     }
 
-    private fun getListOfMail(response: String) {
-        val tokenForUser = response
-        val mailListService = ServiceGenerator.createService(GmailService::class.java, tokenForUser)
-        val mailCall = mailListService.getListOfEmails("me", CONTACTS_SCOPE,
-                BuildConfig.GOOGLE_API_CLIENT_ID,
-                redirectUri)
-        mailCall.enqueue(object : Callback<ListOfMailIds> {
-            override fun onResponse(call: Call<ListOfMailIds>, response: Response<ListOfMailIds>) {
-                val listOfIdsOfMails = response.body()
-                /*
-                Log.v("my_tag", "mail data received is: " + listOfIdsOfMails)
-
-                Log.v("my_tag", "mail id is: " + listOfIdsOfMails?.messages?.get(0)?.id)
-                */
-                var count = 0
-                for (singleMessage in listOfIdsOfMails?.messages!!) {
-                    count = count + 1
-                    getMessageFromMessageList("me", singleMessage.id,
-                            CONTACTS_SCOPE,
-                            BuildConfig.GOOGLE_API_CLIENT_ID,
-                            redirectUri,
-                            tokenForUser)
-                    if (count == 5)
-                        break
-                }
-                /*
-
-                Log.v("my_tag", "response.errorBody() is: " + accessToken)
-                Log.v("my_tag", "response.message() is: " + response.message())
-                Log.v("my_tag", "response.code() is: " + response.code())
-                Log.v("my_tag", "response.headers() is: " + response.headers())
-                Log.v("my_tag", "response.raw() is: " + response.raw())
-                */
-
-            }
-
-            override fun onFailure(call: Call<ListOfMailIds>, t: Throwable) {
-                Log.e("my_tag", "error is: " + t.message)
-            }
-        })
-    }
 
     private fun saveTokenToSharedPreference(accessTokenResponse: Response<AccessToken>) {
         // save token
-        val sharedPref = getPreferences(Context.MODE_PRIVATE)
-        with(sharedPref.edit()) {
-            putString("token", accessTokenResponse.body()?.accessToken)
-            apply()
-        }
+//        val sharedPref = getSharedPreferences("token", MODE_PRIVATE)
+//        with(sharedPref.edit()) {
+//            putString("token", accessTokenResponse.body()?.accessToken)
+//            apply()
+//        }
+
+        val settings: SharedPreferences = getSharedPreferences("token", Context.MODE_PRIVATE);
+        val editor: SharedPreferences.Editor = settings.edit();
+        editor.putString("token", accessTokenResponse.body()?.accessToken);
+        editor.commit();
     }
 
-    private fun getMessageFromMessageList(userId: String, messageId: String?, scope: String, client_ID: String, redirectUri: String, tokenForUser: String?) {
-        val singleMessageService = ServiceGenerator.createService(ParticularItemService::class.java, tokenForUser)
-        val singleMessageCall = singleMessageService.getParticularEmail("me", messageId!!, scope,
-                client_ID,
-                redirectUri)
-        singleMessageCall.enqueue(object : Callback<Message> {
-            override fun onFailure(call: Call<Message>, t: Throwable) {
-
-                Log.v("my_tag", "fail message is: " + t.message.toString())
-            }
-
-            override fun onResponse(call: Call<Message>, response: Response<Message>) {
-
-                /*
-                Log.v("my_tag", "response.errorBody() is: " + response.errorBody())
-                Log.v("my_tag", "response.message() is: " + response.message())
-                Log.v("my_tag", "response.code() is: " + response.code())
-                Log.v("my_tag", "response.headers() is: " + response.headers())
-                Log.v("my_tag", "response.raw() is: " + response.raw())
-
-                Log.v("my_tag", "internalDate received: " + response.body()?.internalDate)
-                */
-                val date = response.body()?.internalDate
-                var from = ""
-                var subject = ""
-                var encodedData = ""
-
-
-                val payload: PayloadInMessage = response.body()?.payload!!
-                val headersInsidePayload = payload.headers
-
-                for (item in headersInsidePayload!!) {
-
-                    val name = item.name
-                    if (name.equals("From")) {
-                        from = item.value!!
-                    } else if (name.equals("Subject")) {
-                        subject = item.value!!
-                    }
-                }
-
-                /*
-                Log.v("my_tag", "from : " + from)
-                Log.v("my_tag", "decoded from : " + java.net.URLDecoder.decode(from, "UTF-8"))
-                Log.v("my_tag", "subject: " + subject)
-                Log.v("my_tag", "messageCreationTime in epoch is: " + date)
-
-                */
-                val time = DateTime(date?.toLong()!!)
-                //Log.v("my_tag", "Time instance in local time-zone is :" + time)
-
-                val partsInPayload = payload.parts
-                //Log.v("my_tag", "parts is: " + partsInPayload)
-
-
-                if (partsInPayload != null) {
-                    //    Log.v("my_tag", "encoded size : " + partsInPayload.get(1).body?.size)
-                    for (body in partsInPayload) {
-                        if (body.mimeType.equals("text/plain")) {
-                            encodedData = body.body?.data!!
-                            Log.v("my_tag", "encoded data: " + encodedData)
-
-                        }
-                    }
-                }
-                /*
-                val mailBody = Base64.decode(encodedData.trim(), Base64.DEFAULT)
-                Log.v("my_tag", "actual message is: " + String(mailBody, Charsets.UTF_8))
-
-                val urlParser = UrlDetector(String(mailBody, Charsets.UTF_8), UrlDetectorOptions.HTML);
-                val detectedUrl = urlParser.detect().get(0).toString()
-
-                val emailParser = UrlDetector(from, UrlDetectorOptions.HTML);
-                val detectedMailFrom = emailParser.detect().get(0).toString()
-
-                */
-                Log.v("my_tag", "_________________________________________")
-
-
-            }
-        })
-
-    }
 
     private fun getAccessTokenFromRefreshToken(refreshToken: String) {
         val refreshTokenService = APIClient.client.create(RefreshTokenService::class.java)

@@ -35,6 +35,8 @@
 
         <receiver android:name=".alarm.AlarmToneReceiver" />
         <receiver android:name=".alarm.AlarmApiCallReceiver" />
+
+        <service android:name=".alarm.FetchMailFromApiService" />
     </application>
 
 </manifest>
