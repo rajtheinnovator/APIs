@@ -52,7 +52,7 @@ class Body_ {
 
 class Header {
 
-    @SerializedName("name")
+    @SerializedName("id")
     @Expose
     var name: String? = null
     @SerializedName("value")
@@ -63,7 +63,7 @@ class Header {
 
 class Header_ {
 
-    @SerializedName("name")
+    @SerializedName("id")
     @Expose
     var name: String? = null
     @SerializedName("value")

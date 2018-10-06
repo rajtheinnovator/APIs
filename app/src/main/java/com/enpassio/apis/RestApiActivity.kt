@@ -10,6 +10,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.DividerItemDecoration
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
@@ -25,10 +29,14 @@ class RestApiActivity : AppCompatActivity() {
     private val TAG = RestApiActivity::class.java.simpleName
     lateinit var mIdTokenTextView: TextView
     lateinit var restApiPlayground: Button
+    lateinit var recyclerView: RecyclerView
     // Scope for reading user's contacts
     private val CONTACTS_SCOPE = "https://mail.google.com/+https://www.googleapis.com/auth/userinfo.email"
     private val redirectUri = BuildConfig.REDIRECT_URI
     var player: MediaPlayer? = null
+    private var mAdapter: RecyclerViewAdapter? = null
+    var listOfMailIds: ArrayList<MessageWithIdAndThreadId>? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_rest_api)
@@ -41,6 +49,17 @@ class RestApiActivity : AppCompatActivity() {
         alarmButton.setOnClickListener {
             ringAlarm()
         }
+
+        recyclerView = findViewById(R.id.recycler_view)
+        mAdapter = RecyclerViewAdapter(listOfMailIds!!, this)
+
+        val mLayoutManager = LinearLayoutManager(applicationContext)
+        recyclerView.layoutManager = mLayoutManager
+        recyclerView.itemAnimator = DefaultItemAnimator()
+        recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        recyclerView.adapter = mAdapter
+
+
     }
 
     //check if token exist already or not and act accordingly
