@@ -39,9 +39,6 @@ class FetchMailFromApiService : Service {
     //check if token exist already or not and act accordingly
     private fun checkIfTokenIsAvailable() {
 
-//        val preferences = getSharedPreferences("token", Context.MODE_PRIVATE)
-//        val token: String = preferences.getString("token", "")!!
-
         val settings = getSharedPreferences("token", Context.MODE_PRIVATE)
         val token = settings.getString("token", "")!!
 
@@ -77,7 +74,9 @@ class FetchMailFromApiService : Service {
                     if (count == 5)
                         break
                 }
+
                 /*
+
 
                 Log.v("my_tag", "response.errorBody() is: " + accessToken)
                 Log.v("my_tag", "response.message() is: " + response.message())
@@ -205,5 +204,9 @@ class FetchMailFromApiService : Service {
     override fun onDestroy() {
         super.onDestroy()
         stopSelf()
+    }
+
+    interface GetMessageList {
+        fun getMessageList(listOfMailIds: List<MessageWithIdAndThreadId>)
     }
 }
