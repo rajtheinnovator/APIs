@@ -4,13 +4,8 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import android.support.annotation.Nullable
 import android.util.Log
 import com.enpassio.apis.*
-import com.google.api.client.util.DateTime
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 
 class FetchMailFromApiService : Service {
@@ -188,6 +183,11 @@ class FetchMailFromApiService : Service {
                 val detectedMailFrom = emailParser.detect().get(0).toString()
 
                 */
+
+                val message_json = JSON.parse(message_data.to_json())
+
+                mime_data = Base64.urlsafe_decode64(message_json['raw'])
+
                 Log.v("my_tag", "_________________________________________")
 
 
