@@ -1,12 +1,6 @@
 package com.enpassio.apis.database
 
-import android.arch.persistence.room.Database
-import android.arch.persistence.room.Room
-import android.arch.persistence.room.RoomDatabase
-import android.content.Context
-import com.enpassio.apis.ListOfMailIds
-import com.enpassio.apis.Message
-
+/*
 @Database(entities = arrayOf(ListOfMailIds::class, Message::class), version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
@@ -32,3 +26,4 @@ abstract class AppDatabase : RoomDatabase() {
     }
 
 }
+        */

@@ -10,9 +10,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.DefaultItemAnimator
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.widget.Button
@@ -50,6 +47,7 @@ class RestApiActivity : AppCompatActivity() {
             ringAlarm()
         }
 
+        /*
         recyclerView = findViewById(R.id.recycler_view)
         mAdapter = RecyclerViewAdapter(listOfMailIds!!, this)
 
@@ -58,6 +56,7 @@ class RestApiActivity : AppCompatActivity() {
         recyclerView.itemAnimator = DefaultItemAnimator()
         recyclerView.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
         recyclerView.adapter = mAdapter
+        */
 
 
     }

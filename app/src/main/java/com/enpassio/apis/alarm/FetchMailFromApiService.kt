@@ -4,8 +4,14 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import android.support.annotation.Nullable
+import android.util.Base64
 import android.util.Log
 import com.enpassio.apis.*
+import kotlinx.serialization.json.JSON
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 class FetchMailFromApiService : Service {
@@ -21,7 +27,7 @@ class FetchMailFromApiService : Service {
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
-        Log.v("my_tag", "FetchMailFromApiService onStartCommand called")
+        Log.d("my_tag", "FetchMailFromApiService onStartCommand called")
         fetchListOfIDsOfMail()
 
         return START_STICKY
@@ -155,7 +161,7 @@ class FetchMailFromApiService : Service {
                 Log.v("my_tag", "messageCreationTime in epoch is: " + date)
 
                 */
-                val time = DateTime(date?.toLong()!!)
+                //val time = DateTime(date?.toLong()!!)
                 //Log.v("my_tag", "Time instance in local time-zone is :" + time)
 
                 val partsInPayload = payload.parts
@@ -184,9 +190,10 @@ class FetchMailFromApiService : Service {
 
                 */
 
-                val message_json = JSON.parse(message_data.to_json())
+                val messageJson = JSON.parse<JSON>(encodedData)
 
-                mime_data = Base64.urlsafe_decode64(message_json['raw'])
+                val mailBody = Base64.decode(messageJson.toString(), Base64.DEFAULT)
+                Log.d("my_tag", "actual message is: " + String(mailBody, Charsets.UTF_8))
 
                 Log.v("my_tag", "_________________________________________")
 

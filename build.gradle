@@ -6,8 +6,7 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven { url "https://dl.bintray.com/jetbrains/kotlin-native-dependencies" }
-        maven { url "https://kotlin.bintray.com/kotlinx" }
+        maven { url "http://kotlin.bintray.com/kotlinx" }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.0'
@@ -21,6 +20,8 @@ buildscript {
 }
 
 allprojects {
+    group 'org.jetbrains'
+    version '1.0-SNAPSHOT'
     repositories {
         google()
         jcenter()
@@ -31,3 +32,4 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+apply plugin: 'kotlinx-serialization'
