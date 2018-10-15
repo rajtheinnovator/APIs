@@ -8,7 +8,7 @@ import android.support.annotation.Nullable
 import android.util.Base64
 import android.util.Log
 import com.enpassio.apis.*
-import kotlinx.serialization.json.JSON
+import com.google.gson.Gson
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -190,10 +190,12 @@ class FetchMailFromApiService : Service {
 
                 */
 
-                val messageJson = JSON.parse<JSON>(encodedData)
-
-                val mailBody = Base64.decode(messageJson.toString(), Base64.DEFAULT)
-                Log.d("my_tag", "actual message is: " + String(mailBody, Charsets.UTF_8))
+                //decoding message with help from the following
+                // link: https://github.com/googleapis/google-api-ruby-client/issues/145
+                val gson = Gson()
+                val jsonMessage = gson.toJson(encodedData)
+                val mailBody = Base64.decode(jsonMessage, Base64.URL_SAFE)
+                Log.d("my_tag", "actual decoded message is: " + String(mailBody, Charsets.UTF_8))
 
                 Log.v("my_tag", "_________________________________________")
 
