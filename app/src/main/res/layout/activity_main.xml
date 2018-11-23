@@ -27,4 +27,17 @@
         android:textColor="@color/colorAccent"
         android:textSize="16sp" />
 
+    <Button
+        android:id="@+id/payment_gateway"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rest_api"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="4dp"
+        android:background="@null"
+        android:text="Start Payment gateway activity"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent"
+        android:textSize="16sp" />
+
 </RelativeLayout>

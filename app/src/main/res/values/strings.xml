@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">APIs</string>
+    <string name="label_payment_gateway_activity">Payment Gateway Activity</string>
 </resources>

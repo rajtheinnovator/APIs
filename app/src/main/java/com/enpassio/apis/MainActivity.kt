@@ -28,6 +28,9 @@ class MainActivity : AppCompatActivity() {
         val restApiButton: Button = findViewById(R.id.rest_api)
         restApiButton.setOnClickListener { startRESTApiActivity() }
 
+        val paymentGatwayButton: Button = findViewById(R.id.payment_gateway)
+        paymentGatwayButton.setOnClickListener { startPaymentGatewayActivity() }
+
         //handle alarm and braodcast
         // Retrieve a PendingIntent that will perform a broadcast
         val alarmToneIntent = Intent(this, AlarmToneReceiver::class.java)
@@ -38,6 +41,10 @@ class MainActivity : AppCompatActivity() {
         //set the alarm broadcast
         //startAlarmToRingAlarmToneForNotification()
         startAlarmToFetchDataFromApi()
+    }
+
+    private fun startPaymentGatewayActivity() {
+        startActivity(Intent(this, PaymentGatewayActivity::class.java))
     }
 
     private fun startAlarmToFetchDataFromApi() {
