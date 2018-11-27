@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.paytm.pg.merchant.CheckSumServiceHelper;
 import com.paytm.pgsdk.PaytmOrder;
 import com.paytm.pgsdk.PaytmPGService;
 import com.paytm.pgsdk.PaytmPaymentTransactionCallback;
@@ -47,7 +48,7 @@ public class PaymentGatewayActivity extends AppCompatActivity {
         paramMap.put("CHECKSUMHASH",
                 "w2QDRMgp1234567JEAPCIOmNgQvsi+BhpqijfM9KvFfRiPmGSt3Ddzw+oTaGCLneJwxFFq5mqTMwJXdQE2EzK4px2xruDqKZjHupz9yXev4=");
         PaytmOrder Order = new PaytmOrder((HashMap<String, String>) paramMap);
-//        String paytmChecksum = CheckSumServiceHelper.getCheckSumServiceHelper().genrateCheckSum(merchantKey, paytmParams);
+        String paytmChecksum = CheckSumServiceHelper.getCheckSumServiceHelper().genrateCheckSum(merchantKey, paytmParams);
         Service.initialize(Order, null);
         Service.startPaymentTransaction(this,
                 true,
