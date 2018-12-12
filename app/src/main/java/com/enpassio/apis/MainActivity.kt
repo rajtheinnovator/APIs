@@ -41,6 +41,14 @@ class MainActivity : AppCompatActivity() {
         //set the alarm broadcast
         //startAlarmToRingAlarmToneForNotification()
         startAlarmToFetchDataFromApi()
+
+        //handle click on webView
+        val webViewForButtonClick = findViewById<Button>(R.id.web_view_click);
+        webViewForButtonClick.setOnClickListener { startWebViewClickActivity() }
+    }
+
+    private fun startWebViewClickActivity() {
+        startActivity(Intent(this@MainActivity, WebViewClickActivity::class.java))
     }
 
     private fun startPaymentGatewayActivity() {

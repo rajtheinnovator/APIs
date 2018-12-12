@@ -40,4 +40,16 @@
         android:textColor="@color/colorAccent"
         android:textSize="16sp" />
 
+    <Button
+        android:id="@+id/web_view_click"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/payment_gateway"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="4dp"
+        android:background="@null"
+        android:text="Click on WebView programatically"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent"
+        android:textSize="16sp" />
 </RelativeLayout>
