@@ -40,6 +40,7 @@
             android:name=".PaymentGatewayActivity"
             android:label="@string/label_payment_gateway_activity"
             android:parentActivityName=".MainActivity" />
+        <activity android:name=".WebViewClickActivity" />
 
         <receiver android:name=".alarm.AlarmToneReceiver" />
         <receiver android:name=".alarm.AlarmApiCallReceiver" />
