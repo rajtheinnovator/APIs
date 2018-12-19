@@ -52,4 +52,17 @@
         android:textAllCaps="false"
         android:textColor="@color/colorAccent"
         android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/spreadsheet_example"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/web_view_click"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="4dp"
+        android:background="@null"
+        android:text="Start Google Spreadsheet Activity"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent"
+        android:textSize="16sp" />
 </RelativeLayout>

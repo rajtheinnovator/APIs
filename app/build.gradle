@@ -23,6 +23,7 @@ android {
     buildTypes.each {
         it.buildConfigField "String", "GOOGLE_API_CLIENT_ID", clientId
         it.buildConfigField "String", "REDIRECT_URI", redirectUri
+        it.buildConfigField "String", "SPREADSHEET_API_KEY", sheetsApiKey
     }
 }
 

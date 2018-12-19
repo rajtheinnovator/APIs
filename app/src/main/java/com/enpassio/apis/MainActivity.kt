@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.widget.Button
 import com.enpassio.apis.alarm.AlarmApiCallReceiver
 import com.enpassio.apis.alarm.AlarmToneReceiver
+import com.enpassio.apis.googlespreadsheet.GoogleSpreadsheetActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -45,6 +46,14 @@ class MainActivity : AppCompatActivity() {
         //handle click on webView
         val webViewForButtonClick = findViewById<Button>(R.id.web_view_click);
         webViewForButtonClick.setOnClickListener { startWebViewClickActivity() }
+
+        //handle Google Spreadsheet
+        val googleSpreadsheetButton: Button = findViewById(R.id.spreadsheet_example)
+        googleSpreadsheetButton.setOnClickListener { startGoogleSpreadsheetActivity() }
+    }
+
+    private fun startGoogleSpreadsheetActivity() {
+        startActivity(Intent(this@MainActivity, GoogleSpreadsheetActivity::class.java))
     }
 
     private fun startWebViewClickActivity() {
