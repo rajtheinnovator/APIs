@@ -1,6 +1,4 @@
 package com.enpassio.apis
-
-
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.BitmapFactory
@@ -29,6 +27,8 @@ class RestApiActivity : AppCompatActivity() {
     lateinit var recyclerView: RecyclerView
     // Scope for reading user's contacts
     private val CONTACTS_SCOPE = "https://mail.google.com/+https://www.googleapis.com/auth/userinfo.email"
+    private val DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
+    private val SPREADSHEET_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
     private val redirectUri = BuildConfig.REDIRECT_URI
     var player: MediaPlayer? = null
     private var mAdapter: RecyclerViewAdapter? = null
@@ -99,7 +99,7 @@ class RestApiActivity : AppCompatActivity() {
                 Uri.parse("https://accounts.google.com/o/oauth2/v2/auth?prompt=consent"
                         + "&response_type=code&client_id="
                         + BuildConfig.GOOGLE_API_CLIENT_ID
-                        + "&scope=" + CONTACTS_SCOPE
+                        + "&scope=" + CONTACTS_SCOPE + DRIVE_SCOPE
                         + "&access_type=offline&Content-Type=application/json"
                         + "&redirect_uri=" + redirectUri),
                 WebViewFallback());
