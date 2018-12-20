@@ -1,4 +1,5 @@
 package com.enpassio.apis
+
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.BitmapFactory
@@ -66,10 +67,10 @@ class RestApiActivity : AppCompatActivity() {
         val settings = getSharedPreferences("token", Context.MODE_PRIVATE)
         val token = settings.getString("token", "")!!
         Log.v("my_taggggg", "token inside restApiActivity is: " + token)
-        //       if (token.isEmpty())
+        if (token.isEmpty())
             setupTokenWithRestApi()
-//        else
-//            getAccessTokenFromRefreshToken(token)
+        else
+            getAccessTokenFromRefreshToken(token)
         Log.v("my_tag", "token inside restApiActivity is: " + token)
     }
 
