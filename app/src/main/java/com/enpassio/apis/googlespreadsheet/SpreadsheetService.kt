@@ -1,6 +1,7 @@
 package com.enpassio.apis.googlespreadsheet
 
 import com.enpassio.apis.ListOfMailIds
+import com.enpassio.apis.googlespreadsheet.model.ListSpreadsheet
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -15,4 +16,13 @@ interface SpreadsheetService {
     fun getSpreadsheetData(@Path("spreadsheetId") spreadsheetId: String,
                            @Query("ranges") ranges: String,
                            @Query("key") key: String): Call<ListOfMailIds>
+}
+
+//https://www.googleapis.com/drive/v3/files?q=mimeType%3D'application%2Fvnd.google-apps.spreadsheet'
+interface ListSpreadsheetService {
+    @GET("drive/v3/files?q")
+    fun getSpreadsheetList(@Query("mimeType") mimeType: String,
+                           @Query("scope") scope: String,
+                           @Query("client_id") client_id: String,
+                           @Query("redirect_uri") redirect_uri: String): Call<ListSpreadsheet>
 }

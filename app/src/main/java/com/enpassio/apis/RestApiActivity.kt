@@ -26,9 +26,9 @@ class RestApiActivity : AppCompatActivity() {
     lateinit var restApiPlayground: Button
     lateinit var recyclerView: RecyclerView
     // Scope for reading user's contacts
-    private val CONTACTS_SCOPE = "https://mail.google.com/+https://www.googleapis.com/auth/userinfo.email"
+    private val CONTACTS_SCOPE = "https://mail.google.com/  https://www.googleapis.com/auth/userinfo.email  https://www.googleapis.com/auth/drive.readonly  https://www.googleapis.com/auth/spreadsheets.readonly"
     private val DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
-    private val SPREADSHEET_SCOPE = "https://www.googleapis.com/auth/spreadsheets"
+    private val SPREADSHEET_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly"
     private val redirectUri = BuildConfig.REDIRECT_URI
     var player: MediaPlayer? = null
     private var mAdapter: RecyclerViewAdapter? = null
@@ -65,10 +65,11 @@ class RestApiActivity : AppCompatActivity() {
     private fun checkIfTokenIsAvailable() {
         val settings = getSharedPreferences("token", Context.MODE_PRIVATE)
         val token = settings.getString("token", "")!!
-        if (token.isEmpty())
+        Log.v("my_taggggg", "token inside restApiActivity is: " + token)
+        //       if (token.isEmpty())
             setupTokenWithRestApi()
-        else
-            getAccessTokenFromRefreshToken(token)
+//        else
+//            getAccessTokenFromRefreshToken(token)
         Log.v("my_tag", "token inside restApiActivity is: " + token)
     }
 
@@ -99,7 +100,7 @@ class RestApiActivity : AppCompatActivity() {
                 Uri.parse("https://accounts.google.com/o/oauth2/v2/auth?prompt=consent"
                         + "&response_type=code&client_id="
                         + BuildConfig.GOOGLE_API_CLIENT_ID
-                        + "&scope=" + CONTACTS_SCOPE + DRIVE_SCOPE
+                        + "&scope=" + CONTACTS_SCOPE
                         + "&access_type=offline&Content-Type=application/json"
                         + "&redirect_uri=" + redirectUri),
                 WebViewFallback());
