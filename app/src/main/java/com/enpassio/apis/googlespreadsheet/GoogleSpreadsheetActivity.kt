@@ -8,7 +8,7 @@ import com.enpassio.apis.BuildConfig
 import com.enpassio.apis.R
 import com.enpassio.apis.ServiceGenerator
 import com.enpassio.apis.googlespreadsheet.model.ListSpreadsheet
-import com.enpassio.apis.googlespreadsheet.model.SpreadsheetData
+import com.enpassio.apis.googlespreadsheet.model.ValueRange
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -58,20 +58,28 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
     private fun callForSingleSpreadsheetData(id: String?, token: String) {
         val spreadsheetService = SpreadsheetServiceGenerator.createService(SpreadsheetService::class.java, token)
         val spreadsheetCall = spreadsheetService.getSpreadsheetData(id.toString(), "A1:Z")
-        spreadsheetCall.enqueue(object : Callback<SpreadsheetData> {
-            override fun onFailure(call: Call<SpreadsheetData>, t: Throwable) {
+        spreadsheetCall.enqueue(object : Callback<ValueRange> {
+            override fun onFailure(call: Call<ValueRange>, t: Throwable) {
                 Log.e("my_taggsss", "single error is: " + t.message)
             }
 
-            override fun onResponse(call: Call<SpreadsheetData>, response: Response<SpreadsheetData>) {
-                val Spreadsheet = response.body()
-                Log.v("my_taggsss", "token inside spreadsheet data received is: " + token)
-                Log.v("my_taggsss", "Spreadsheet data received is: " + Spreadsheet)
-                Log.v("my_taggsss", "response.errorBody() is: " + response.errorBody())
-                Log.v("my_taggsss", "response.message() is: " + response.message())
-                Log.v("my_taggsss", "response.code() is: " + response.code())
-                Log.v("my_taggsss", "response.headers() is: " + response.headers())
-                Log.v("my_taggsss", "response.raw() is: " + response.raw())
+            override fun onResponse(call: Call<ValueRange>, response: Response<ValueRange>) {
+                val valueRange = response.body()
+                if (valueRange?.values != null) {
+                    for (singleValue in valueRange.values!!) {
+                        if (singleValue.size > 0) {
+                            Log.v("my_taggsss", "Spreadsheet data value is: " + singleValue)
+
+                        }
+                    }
+                }
+//                Log.v("my_taggsss", "token inside spreadsheet data received is: " + token)
+//                Log.v("my_taggsss", "Spreadsheet data received is: " + spreadsheet)
+//                Log.v("my_taggsss", "response.errorBody() is: " + response.errorBody())
+//                Log.v("my_taggsss", "response.message() is: " + response.message())
+//                Log.v("my_taggsss", "response.code() is: " + response.code())
+//                Log.v("my_taggsss", "response.headers() is: " + response.headers())
+//                Log.v("my_taggsss", "response.raw() is: " + response.raw())
             }
         })
     }

@@ -1,7 +1,7 @@
 package com.enpassio.apis.googlespreadsheet
 
 import com.enpassio.apis.googlespreadsheet.model.ListSpreadsheet
-import com.enpassio.apis.googlespreadsheet.model.SpreadsheetData
+import com.enpassio.apis.googlespreadsheet.model.ValueRange
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -14,7 +14,7 @@ import retrofit2.http.Query
 interface SpreadsheetService {
     @GET("v4/spreadsheets/{spreadsheetId}/values/{ranges}")
     fun getSpreadsheetData(@Path("spreadsheetId") spreadsheetId: String,
-                           @Path("ranges") ranges: String): Call<SpreadsheetData>
+                           @Path("ranges") ranges: String): Call<ValueRange>
 }
 
 //https://www.googleapis.com/drive/v3/files?q=mimeType%3D'application%2Fvnd.google-apps.spreadsheet'
