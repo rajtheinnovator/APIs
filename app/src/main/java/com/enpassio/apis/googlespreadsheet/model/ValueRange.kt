@@ -8,18 +8,17 @@ import com.google.gson.annotations.SerializedName
 /**
  * Created by Abhishek Raj on 12/20/2018.
  */
-
 class ValueRange : Parcelable {
 
     @SerializedName("range")
     @Expose
     var range: String? = null
-    @SerializedName("majorDimension")
-    @Expose
-    var majorDimension: String? = null
     @SerializedName("values")
     @Expose
     var values: List<List<String>>? = null
+    @SerializedName("majorDimension")
+    @Expose
+    var majorDimension: String? = null
 
     /**
      * No args constructor for use in serialization
@@ -33,10 +32,10 @@ class ValueRange : Parcelable {
      * @param range
      * @param majorDimension
      */
-    constructor(range: String, majorDimension: String, values: List<List<String>>) : super() {
+    constructor(range: String, values: List<List<String>>, majorDimension: String) : super() {
         this.range = range
-        this.majorDimension = majorDimension
         this.values = values
+        this.majorDimension = majorDimension
     }
 
 
@@ -55,6 +54,7 @@ class ValueRange : Parcelable {
     }
 
     companion object {
+
         @JvmField
         val CREATOR: Parcelable.Creator<ValueRange> = object : Parcelable.Creator<ValueRange> {
             override fun createFromParcel(`in`: Parcel): ValueRange {

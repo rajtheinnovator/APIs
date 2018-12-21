@@ -8,16 +8,14 @@ import com.enpassio.apis.BuildConfig
 import com.enpassio.apis.R
 import com.enpassio.apis.ServiceGenerator
 import com.enpassio.apis.googlespreadsheet.model.ListSpreadsheet
+import com.enpassio.apis.googlespreadsheet.model.SpreadsheetData
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class GoogleSpreadsheetActivity : AppCompatActivity() {
 
-    private val CONTACTS_SCOPE = "https://mail.google.com/+https://www.googleapis.com/auth/userinfo.email"
-    private val DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
-    private val SPREADSHEET_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly"
-    private val redirectUri = BuildConfig.REDIRECT_URI
+    private val DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly   https://www.googleapis.com/auth/spreadsheets.readonly"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,11 +28,10 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
 
     private fun getListOfMail(token: String) {
         val tokenForUser = token
-        val mailListService = ServiceGenerator.createService(ListSpreadsheetService::class.java, tokenForUser)
-        val mailCall = mailListService.getSpreadsheetList("application/vnd.google-apps.spreadsheet", CONTACTS_SCOPE + DRIVE_SCOPE + SPREADSHEET_SCOPE,
-                BuildConfig.GOOGLE_API_CLIENT_ID,
-                redirectUri)
-        mailCall.enqueue(object : Callback<ListSpreadsheet> {
+        val listSpreadsheetService = ServiceGenerator.createService(ListSpreadsheetService::class.java, tokenForUser)
+        val listSpreadsheetCall = listSpreadsheetService.getSpreadsheetList("application/vnd.google-apps.spreadsheet", DRIVE_SCOPE,
+                BuildConfig.GOOGLE_API_CLIENT_ID)
+        listSpreadsheetCall.enqueue(object : Callback<ListSpreadsheet> {
             override fun onResponse(call: Call<ListSpreadsheet>, response: Response<ListSpreadsheet>) {
                 val listOfSpreadsheet = response.body()
 
@@ -45,14 +42,36 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
                 Log.v("my_taggggg", "response.code() is: " + response.code())
                 Log.v("my_taggggg", "response.headers() is: " + response.headers())
                 Log.v("my_taggggg", "response.raw() is: " + response.raw())
-                for (fie in listOfSpreadsheet?.files!!) {
-                    Log.v("my_taggggg", "spreadsheet id is: " + fie.id)
+                for (file in listOfSpreadsheet?.files!!) {
+                    Log.v("my_taggggg", "spreadsheet id is: " + file.id)
+//                    callForSingleSpreadsheetData(file.id, token)
                 }
-
+                callForSingleSpreadsheetData(listOfSpreadsheet.files!!.get(0).id, token)
             }
 
             override fun onFailure(call: Call<ListSpreadsheet>, t: Throwable) {
                 Log.e("my_taggggg", "error is: " + t.message)
+            }
+        })
+    }
+
+    private fun callForSingleSpreadsheetData(id: String?, token: String) {
+        val spreadsheetService = SpreadsheetServiceGenerator.createService(SpreadsheetService::class.java, token)
+        val spreadsheetCall = spreadsheetService.getSpreadsheetData(id.toString(), "A1:Z")
+        spreadsheetCall.enqueue(object : Callback<SpreadsheetData> {
+            override fun onFailure(call: Call<SpreadsheetData>, t: Throwable) {
+                Log.e("my_taggsss", "single error is: " + t.message)
+            }
+
+            override fun onResponse(call: Call<SpreadsheetData>, response: Response<SpreadsheetData>) {
+                val Spreadsheet = response.body()
+                Log.v("my_taggsss", "token inside spreadsheet data received is: " + token)
+                Log.v("my_taggsss", "Spreadsheet data received is: " + Spreadsheet)
+                Log.v("my_taggsss", "response.errorBody() is: " + response.errorBody())
+                Log.v("my_taggsss", "response.message() is: " + response.message())
+                Log.v("my_taggsss", "response.code() is: " + response.code())
+                Log.v("my_taggsss", "response.headers() is: " + response.headers())
+                Log.v("my_taggsss", "response.raw() is: " + response.raw())
             }
         })
     }
