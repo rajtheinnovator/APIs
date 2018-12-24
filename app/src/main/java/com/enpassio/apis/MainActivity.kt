@@ -10,6 +10,7 @@ import android.widget.Button
 import com.enpassio.apis.alarm.AlarmApiCallReceiver
 import com.enpassio.apis.alarm.AlarmToneReceiver
 import com.enpassio.apis.googlespreadsheet.GoogleSpreadsheetActivity
+import com.enpassio.apis.mapsexample.MapsExampleActivity
 
 
 class MainActivity : AppCompatActivity() {
@@ -53,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
         //handle maps activity
         val mapsExampleActivityButton: Button = findViewById(R.id.maps_example)
-        paymentGatwayButton.setOnClickListener { startMapsExampleActivity() }
+        mapsExampleActivityButton.setOnClickListener { startMapsExampleActivity() }
     }
 
     private fun startMapsExampleActivity() {
