@@ -46,7 +46,8 @@
 
         <service android:name=".alarm.FetchMailFromApiService" />
 
-        <activity android:name=".googlespreadsheet.GoogleSpreadsheetActivity"></activity>
+        <activity android:name=".googlespreadsheet.GoogleSpreadsheetActivity" />
+        <activity android:name=".mapsexample.MapsExampleActivity"></activity>
     </application>
 
 </manifest>

@@ -50,6 +50,14 @@ class MainActivity : AppCompatActivity() {
         //handle Google Spreadsheet
         val googleSpreadsheetButton: Button = findViewById(R.id.spreadsheet_example)
         googleSpreadsheetButton.setOnClickListener { startGoogleSpreadsheetActivity() }
+
+        //handle maps activity
+        val mapsExampleActivityButton: Button = findViewById(R.id.maps_example)
+        paymentGatwayButton.setOnClickListener { startMapsExampleActivity() }
+    }
+
+    private fun startMapsExampleActivity() {
+        startActivity(Intent(this@MainActivity, MapsExampleActivity::class.java))
     }
 
     private fun startGoogleSpreadsheetActivity() {
