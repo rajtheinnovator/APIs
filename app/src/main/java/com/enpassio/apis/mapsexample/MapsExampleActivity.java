@@ -1,9 +1,12 @@
 package com.enpassio.apis.mapsexample;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -13,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.enpassio.apis.R;
 import com.google.android.gms.common.ConnectionResult;
@@ -26,7 +30,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
-import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,21 +37,23 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 public class MapsExampleActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private GoogleMap mMap;
-    private Location location;
+    private Location mLocation;
 
 
     public static final int LOCATION_PERMISSION_CODE = 2;
     private static final int LOCATION_SETTINGS_REQUEST_CODE = 1133;
     //handle gps
-    private GoogleApiClient googleApiClient;
-    private LocationRequest mLocationRequest;
+    private GoogleApiClient mGoogleApiClient;
     private FusedLocationProviderClient mFusedLocationClient;
-    private SettingsClient mSettingsClient;
-    private LocationSettingsRequest mLocationSettingsRequest;
     private LocationCallback mLocationCallback;
 
     @Override
@@ -58,14 +63,13 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         //initialize api client
-        googleApiClient = new GoogleApiClient.Builder(this)
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
-        mSettingsClient = LocationServices.getSettingsClient(this);
         permissionHandle();
     }
 
@@ -73,7 +77,9 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         int DeviceSdkVersion = Build.VERSION.SDK_INT;
         if (DeviceSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1) {
             if (checkIfLocationPermissionGranted()) {
-                enableGps();
+                if (!gpsIsEnabled()) {
+                    enableGps();
+                }
                 getCurrentLocationOfUser();
             } else {
                 getUsersLocationPermission();
@@ -85,10 +91,6 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 LOCATION_PERMISSION_CODE);
-
-    }
-
-    private void getCurrentLocationOfUser() {
 
     }
 
@@ -139,11 +141,13 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
             case LOCATION_PERMISSION_CODE:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //granted
-                    enableGps();
+                    if (!gpsIsEnabled()) {
+                        enableGps();
+                    }
                     getCurrentLocationOfUser();
                 } else {
-                    //not granted
-                    getCoarseLocation();
+                    //not granted, so don't do anything location related
+
                 }
                 break;
             default:
@@ -151,18 +155,38 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         }
     }
 
-    private void getCoarseLocation() {
 
+    @SuppressLint("MissingPermission")
+    private void getCurrentLocationOfUser() {
+        if (checkIfLocationPermissionGranted()) {
+            mFusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            // Got last known location. In some rare situations this can be null.
+                            if (location != null) {
+                                // Logic to handle location object
+                                mLocation = location;
+                                List<Address> currentAddress = null;
+                                Log.d("my_tag", "location fetched is: " + location.getAltitude());
+                                LatLng sydney = new LatLng(location.getLatitude(), location.getLongitude());
+                                try {
+                                    currentAddress = new Geocoder(MapsExampleActivity.this, Locale.getDefault()).getFromLocation(mLocation.getLatitude(), mLocation.getLongitude(), 1);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                mMap.addMarker(new MarkerOptions().position(sydney).title(currentAddress.get(0).getFeatureName()));
+                                mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
+                            }
+                        }
+                    });
+        }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        // Add a marker in Sydney, Australia, and move the camera.
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     @Override
