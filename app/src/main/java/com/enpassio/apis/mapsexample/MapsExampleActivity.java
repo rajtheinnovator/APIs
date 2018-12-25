@@ -8,23 +8,20 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.enpassio.apis.R;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -44,17 +41,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-public class MapsExampleActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MapsExampleActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private Location mLocation;
-
-
     public static final int LOCATION_PERMISSION_CODE = 2;
     private static final int LOCATION_SETTINGS_REQUEST_CODE = 1133;
     //handle gps
-    private GoogleApiClient mGoogleApiClient;
     private FusedLocationProviderClient mFusedLocationClient;
-    private LocationCallback mLocationCallback;
+    LocationManager locationManager;
+    private LocationListener mLocationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +59,31 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        //initialize api client
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
+        mLocationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                mLocation = location;
+                Log.d("my_tag", "location fetched inside LocationListener is: " + location.getLatitude() + ", " + location.getLongitude());
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+
+            }
+        };
+        //handle location callback
+        // Acquire a reference to the system Location Manager
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         permissionHandle();
     }
 
@@ -159,6 +173,8 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     @SuppressLint("MissingPermission")
     private void getCurrentLocationOfUser() {
         if (checkIfLocationPermissionGranted()) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, mLocationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, mLocationListener);
             mFusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                         @Override
@@ -187,20 +203,5 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 }
