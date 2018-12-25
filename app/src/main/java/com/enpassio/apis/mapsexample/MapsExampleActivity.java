@@ -41,6 +41,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+/* References/resources
+ * https://stackoverflow.com/a/33023788   --->> Location listeners
+ * https://developer.android.com/guide/topics/location/strategies
+ * https://stackoverflow.com/a/27504607  --->> Draggable maps
+ * https://github.com/Sishin/MapLocation  --->> Uber like map
+ * https://github.com/amanjeetsingh150/UberCarAnimation   --->> Uber car animation
+ * https://gist.github.com/rajtheinnovator/d3ae76273f7a2acbe161868df684c6be   --->> Turn on Gps programmatically
+ * https://developer.android.com/training/location/receive-location-updates
+ * https://www.journaldev.com/13325/android-location-api-tracking-gps   --->> LocationListener with lifecycle
+ *
+ * */
 public class MapsExampleActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private Location mLocation;
