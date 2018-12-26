@@ -56,6 +56,9 @@ import java.util.Locale;
  * https://gist.github.com/rajtheinnovator/d3ae76273f7a2acbe161868df684c6be   --->> Turn on Gps programmatically
  * https://developer.android.com/training/location/receive-location-updates
  * https://www.journaldev.com/13325/android-location-api-tracking-gps   --->> LocationListener with lifecycle
+ * https://stackoverflow.com/a/37048987   --->> Rotate map and car animation
+ * https://www.ipragmatech.com/add-custom-image-in-google-maps-marker-android/   --->>Include bounds/markers for proper zooming
+ *
  *
  * */
 public class MapsExampleActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -278,7 +281,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         } catch (IOException e) {
             e.printStackTrace();
         }
-        markerLocationNameTextView.setText(currentAddress.get(0).getAddressLine(0));
+        markerLocationNameTextView.setText(currentAddress != null ? currentAddress.get(0).getAddressLine(0) : "");
 
     }
 }
