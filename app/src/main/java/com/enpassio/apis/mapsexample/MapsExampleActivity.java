@@ -66,7 +66,6 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     private FusedLocationProviderClient mFusedLocationClient;
     LocationManager locationManager;
     private LocationListener mLocationListener;
-    private boolean isMoving;
     private CameraPosition cameraPosition;
     private ImageView markerIconView;
     private GoogleMap.OnCameraIdleListener onCameraIdleListener;
@@ -228,7 +227,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                mMap.addMarker(new MarkerOptions().position(sydney).title(currentAddress.get(0).getFeatureName()));
+                                mMap.addMarker(new MarkerOptions().position(sydney).title(currentAddress.get(0).getFeatureName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_pin)));
                                 mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18.0f));
                             }
@@ -242,16 +241,12 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
-        isMoving = false;
+        mMap.setOnCameraIdleListener(onCameraIdleListener);
         mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
             @Override
             public void onCameraMoveStarted(int i) {
                 Log.d("my_tag", "onCameraMoveStarted called");
-                isMoving = true;
-                if (mMap != null) {
-                    mMap.clear();
-                }
-                markerIconView.setVisibility(View.GONE);
+                markerIconView.setVisibility(View.VISIBLE);
                 mMap.setOnCameraIdleListener(onCameraIdleListener);
             }
         });
@@ -260,15 +255,18 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     private void handleCameraMove() {
         Log.d("my_taggg", "handleCameraMove called");
         // Cleaning all the markers.
+        if (mMap != null) {
+            mMap.clear();
+        }
         markerIconView.setVisibility(View.GONE);
         cameraPosition = new CameraPosition.Builder().target(mMap.getCameraPosition().target).zoom(mMap.getCameraPosition().zoom).build();
-        List<Address> currentAddress = null;
-        try {
-            currentAddress = new Geocoder(MapsExampleActivity.this, Locale.getDefault()).getFromLocation(mMap.getCameraPosition().target.latitude, mMap.getCameraPosition().target.longitude, 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        mMap.addMarker(new MarkerOptions().position(mMap.getCameraPosition().target).title(currentAddress.get(0).getFeatureName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_pin)).anchor(0.5f, 1));
+//        List<Address> currentAddress = null;
+//        try {
+//            currentAddress = new Geocoder(MapsExampleActivity.this, Locale.getDefault()).getFromLocation(mMap.getCameraPosition().target.latitude, mMap.getCameraPosition().target.longitude, 1);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        mMap.addMarker(new MarkerOptions().position(mMap.getCameraPosition().target).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_pin)).anchor(0.5f, 0.5f));
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 }
