@@ -17,6 +17,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.enpassio.apis.R;
 import com.google.android.gms.common.api.ApiException;
@@ -31,6 +34,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -64,6 +68,8 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     private LocationListener mLocationListener;
     private boolean isMoving;
     private CameraPosition cameraPosition;
+    private ImageView markerIconView;
+    private GoogleMap.OnCameraIdleListener onCameraIdleListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,13 +77,22 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         setContentView(R.layout.activity_maps_example);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+        markerIconView = findViewById(R.id.marker_icon_view);
+        markerIconView.setVisibility(View.GONE);
+        markerIconView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d("my_tag", "custom view clicked");
+                Toast.makeText(MapsExampleActivity.this, "custom view clicked", Toast.LENGTH_SHORT).show();
+            }
+        });
         mapFragment.getMapAsync(this);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 mLocation = location;
-                Log.d("my_tag", "location fetched inside LocationListener is: " + location.getLatitude() + ", " + location.getLongitude());
+                //Log.d("my_tag", "location fetched inside LocationListener is: " + location.getLatitude() + ", " + location.getLongitude());
             }
 
             @Override
@@ -99,6 +114,14 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         // Acquire a reference to the system Location Manager
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         permissionHandle();
+        onCameraIdleListener = new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                Log.d("my_taggg", "onCameraIdle called");
+                handleCameraMove();
+                mMap.setOnCameraIdleListener(null);
+            }
+        };
     }
 
     private void permissionHandle() {
@@ -223,23 +246,28 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
             @Override
             public void onCameraMoveStarted(int i) {
+                Log.d("my_tag", "onCameraMoveStarted called");
                 isMoving = true;
+                if (mMap != null) {
+                    mMap.clear();
+                }
+                markerIconView.setVisibility(View.GONE);
+                mMap.setOnCameraIdleListener(onCameraIdleListener);
             }
         });
-        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+        mMap.setOnCameraMoveCanceledListener(new GoogleMap.OnCameraMoveCanceledListener() {
             @Override
-            public void onCameraIdle() {
-                handleCameraMove();
+            public void onCameraMoveCanceled() {
+                Log.d("my_taggg", "onCameraMoveCanceled called");
+                markerIconView.setVisibility(View.GONE);
             }
         });
     }
 
     private void handleCameraMove() {
+        Log.d("my_taggg", "handleCameraMove called");
         // Cleaning all the markers.
-        if (mMap != null) {
-            mMap.clear();
-        }
-
+        markerIconView.setVisibility(View.GONE);
         cameraPosition = new CameraPosition.Builder().target(mMap.getCameraPosition().target).zoom(mMap.getCameraPosition().zoom).build();
         List<Address> currentAddress = null;
         try {
@@ -247,7 +275,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         } catch (IOException e) {
             e.printStackTrace();
         }
-        mMap.addMarker(new MarkerOptions().position(mMap.getCameraPosition().target).title(currentAddress.get(0).getFeatureName()));
+        mMap.addMarker(new MarkerOptions().position(mMap.getCameraPosition().target).title(currentAddress.get(0).getFeatureName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_pin)).anchor(0.5f, 1));
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 }
