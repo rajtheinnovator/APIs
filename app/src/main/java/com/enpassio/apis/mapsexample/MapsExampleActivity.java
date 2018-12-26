@@ -255,13 +255,6 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
                 mMap.setOnCameraIdleListener(onCameraIdleListener);
             }
         });
-        mMap.setOnCameraMoveCanceledListener(new GoogleMap.OnCameraMoveCanceledListener() {
-            @Override
-            public void onCameraMoveCanceled() {
-                Log.d("my_taggg", "onCameraMoveCanceled called");
-                markerIconView.setVisibility(View.GONE);
-            }
-        });
     }
 
     private void handleCameraMove() {
