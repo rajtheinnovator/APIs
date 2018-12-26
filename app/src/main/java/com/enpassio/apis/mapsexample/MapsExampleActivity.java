@@ -31,6 +31,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -61,6 +62,8 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     private FusedLocationProviderClient mFusedLocationClient;
     LocationManager locationManager;
     private LocationListener mLocationListener;
+    private boolean isMoving;
+    private CameraPosition cameraPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -211,8 +214,40 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         }
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
+        isMoving = false;
+        mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
+            @Override
+            public void onCameraMoveStarted(int i) {
+                isMoving = true;
+            }
+        });
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                handleCameraMove();
+            }
+        });
+    }
+
+    private void handleCameraMove() {
+        // Cleaning all the markers.
+        if (mMap != null) {
+            mMap.clear();
+        }
+
+        cameraPosition = new CameraPosition.Builder().target(mMap.getCameraPosition().target).zoom(mMap.getCameraPosition().zoom).build();
+        List<Address> currentAddress = null;
+        try {
+            currentAddress = new Geocoder(MapsExampleActivity.this, Locale.getDefault()).getFromLocation(mMap.getCameraPosition().target.latitude, mMap.getCameraPosition().target.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        mMap.addMarker(new MarkerOptions().position(mMap.getCameraPosition().target).title(currentAddress.get(0).getFeatureName()));
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
     }
 }
