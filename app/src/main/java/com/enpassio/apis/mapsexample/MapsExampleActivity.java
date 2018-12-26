@@ -3,6 +3,7 @@ package com.enpassio.apis.mapsexample;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -10,6 +11,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -282,6 +284,20 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
             e.printStackTrace();
         }
         markerLocationNameTextView.setText(currentAddress != null ? currentAddress.get(0).getAddressLine(0) : "");
+
+        //start navigation on click on location text
+        markerLocationNameTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String packageName = "com.google.android.apps.maps";
+                String query = "google.navigation:q=" + mMap.getCameraPosition().target.latitude + "," + mMap.getCameraPosition().target.longitude;
+                Intent intent = MapsExampleActivity.this.getPackageManager().getLaunchIntentForPackage(packageName);
+                intent.setAction(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(query));
+                startActivity(intent);
+            }
+        });
+
 
     }
 }
