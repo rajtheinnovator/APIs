@@ -19,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enpassio.apis.R;
@@ -68,7 +69,9 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     private LocationListener mLocationListener;
     private CameraPosition cameraPosition;
     private ImageView markerIconView;
+    private TextView markerLocationNameTextView;
     private GoogleMap.OnCameraIdleListener onCameraIdleListener;
+    private GoogleMap.OnCameraMoveStartedListener onCameraMoveStartedListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +80,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         markerIconView = findViewById(R.id.marker_icon_view);
+        markerLocationNameTextView = findViewById(R.id.location_name_text_view);
         markerIconView.setVisibility(View.GONE);
         markerIconView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,9 +120,22 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         onCameraIdleListener = new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                Log.d("my_taggg", "onCameraIdle called");
+                Log.d("my_tagggsss", "onCameraIdle called");
                 handleCameraMove();
                 mMap.setOnCameraIdleListener(null);
+                mMap.setOnCameraMoveStartedListener(onCameraMoveStartedListener);
+            }
+        };
+        onCameraMoveStartedListener = new GoogleMap.OnCameraMoveStartedListener() {
+            @Override
+            public void onCameraMoveStarted(int i) {
+                Log.d("my_tagggsss", "onCameraMoveStarted called");
+                if (mMap != null) {
+                    mMap.clear();
+                }
+                markerIconView.setVisibility(View.VISIBLE);
+                mMap.setOnCameraIdleListener(onCameraIdleListener);
+                mMap.setOnCameraMoveStartedListener(null);
             }
         };
     }
@@ -242,14 +259,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
         mMap.setOnCameraIdleListener(onCameraIdleListener);
-        mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
-            @Override
-            public void onCameraMoveStarted(int i) {
-                Log.d("my_tag", "onCameraMoveStarted called");
-                markerIconView.setVisibility(View.VISIBLE);
-                mMap.setOnCameraIdleListener(onCameraIdleListener);
-            }
-        });
+        mMap.setOnCameraMoveStartedListener(onCameraMoveStartedListener);
     }
 
     private void handleCameraMove() {
@@ -260,13 +270,15 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         }
         markerIconView.setVisibility(View.GONE);
         cameraPosition = new CameraPosition.Builder().target(mMap.getCameraPosition().target).zoom(mMap.getCameraPosition().zoom).build();
-//        List<Address> currentAddress = null;
-//        try {
-//            currentAddress = new Geocoder(MapsExampleActivity.this, Locale.getDefault()).getFromLocation(mMap.getCameraPosition().target.latitude, mMap.getCameraPosition().target.longitude, 1);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
         mMap.addMarker(new MarkerOptions().position(mMap.getCameraPosition().target).icon(BitmapDescriptorFactory.fromResource(R.drawable.marker_pin)).anchor(0.5f, 0.5f));
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        List<Address> currentAddress = null;
+        try {
+            currentAddress = new Geocoder(MapsExampleActivity.this, Locale.getDefault()).getFromLocation(mMap.getCameraPosition().target.latitude, mMap.getCameraPosition().target.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        markerLocationNameTextView.setText(currentAddress.get(0).getAddressLine(0));
+
     }
 }
