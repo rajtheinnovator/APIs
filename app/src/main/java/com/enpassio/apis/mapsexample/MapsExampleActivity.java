@@ -58,9 +58,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-
 /* References/resources
  * https://stackoverflow.com/a/33023788   --->> Location listeners
  * https://developer.android.com/guide/topics/location/strategies
@@ -121,7 +118,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         parseJsonButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                parseJsonAndSetOnTextView();
+                animateCarMoveAndHandlemarkerRotation();
             }
         });
         markerIconView.setVisibility(View.GONE);
@@ -183,37 +180,6 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         };
     }
 
-    private void parseJsonAndSetOnTextView() {
-
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url("https://maps.googleapis.com/maps/api/directions/json?origin=12.9172309%2C77.6100577&destination=12.9362329%2C77.60161719999999&key=AIzaSyCW_bHL0gT86obrUrmFFrAMVT326FD6gIU&alternatives=true")
-                .build();
-        animate();
-//        client.newCall(request).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(Call call, IOException e) {
-//
-//            }
-//
-//            @Override
-//            public void onResponse(Call call, Response response) throws IOException {
-//                Gson gson = new Gson();
-//                JSONObject jsonObject = null;
-//                JSONArray jRoutes;
-//                try {
-//                    jsonObject = new JSONObject(response.body().toString());
-//                    jRoutes = jsonObject.getJSONArray("routes");
-//                    route = gson.fromJson(jRoutes.getJSONObject(0).toString(), Route.class);
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                    Log.e("my_tag", "error is: " + e.getMessage().toString());
-//                }
-//                parsedJsonData.setText("" + route.getLegs());
-//            }
-//        });
-    }
-
     private double bearingBetweenLocations(LatLng latLng1, LatLng latLng2) {
 
         double PI = 3.14159;
@@ -236,7 +202,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         return brng;
     }
 
-    private void animate() {
+    private void animateCarMoveAndHandlemarkerRotation() {
         int i = 0;
         while (i < listOfPoints.size() - 2) {
             mMap.clear();
@@ -433,8 +399,8 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
-//        mMap.setOnCameraIdleListener(onCameraIdleListener);
-//        mMap.setOnCameraMoveStartedListener(onCameraMoveStartedListener);
+        mMap.setOnCameraIdleListener(onCameraIdleListener);
+        mMap.setOnCameraMoveStartedListener(onCameraMoveStartedListener);
     }
 
     private void handleCameraMove() {
@@ -467,7 +433,5 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
                 startActivity(intent);
             }
         });
-
-
     }
 }
