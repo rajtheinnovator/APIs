@@ -36,4 +36,22 @@
         android:padding="16dp"
         android:textColor="#000000"
         android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/parse_json"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/parsed_json_data"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="19dp"
+        android:layout_marginBottom="19dp"
+        android:text="parse Json" />
+
+    <TextView
+        android:id="@+id/parsed_json_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/location_name_text_view"
+        android:layout_marginBottom="31dp"
+        android:textSize="14sp" />
 </RelativeLayout>

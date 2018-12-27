@@ -20,11 +20,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enpassio.apis.R;
+import com.enpassio.apis.mapsexample.model.Leg;
+import com.enpassio.apis.mapsexample.model.Route;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -44,10 +47,21 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 /* References/resources
  * https://stackoverflow.com/a/33023788   --->> Location listeners
@@ -60,8 +74,7 @@ import java.util.Locale;
  * https://www.journaldev.com/13325/android-location-api-tracking-gps   --->> LocationListener with lifecycle
  * https://stackoverflow.com/a/37048987   --->> Rotate map and car animation
  * https://www.ipragmatech.com/add-custom-image-in-google-maps-marker-android/   --->>Include bounds/markers for proper zooming
- *
- *
+ * https://stackoverflow.com/a/36746136   --->> Google maps intent
  * */
 public class MapsExampleActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -75,8 +88,12 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     private CameraPosition cameraPosition;
     private ImageView markerIconView;
     private TextView markerLocationNameTextView;
+    private Button parseJsonButton;
+    private TextView parsedJsonData;
     private GoogleMap.OnCameraIdleListener onCameraIdleListener;
     private GoogleMap.OnCameraMoveStartedListener onCameraMoveStartedListener;
+    private List<Leg> legsInRoute;
+    private Route route;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +103,14 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
                 .findFragmentById(R.id.map);
         markerIconView = findViewById(R.id.marker_icon_view);
         markerLocationNameTextView = findViewById(R.id.location_name_text_view);
+        parseJsonButton = findViewById(R.id.parse_json);
+        parsedJsonData = findViewById(R.id.parsed_json_data);
+        parseJsonButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                parseJsonAndSetOnTextView();
+            }
+        });
         markerIconView.setVisibility(View.GONE);
         markerIconView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -143,6 +168,36 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
                 mMap.setOnCameraMoveStartedListener(null);
             }
         };
+    }
+
+    private void parseJsonAndSetOnTextView() {
+
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url("https://maps.googleapis.com/maps/api/directions/json?origin=12.9172309%2C77.6100577&destination=12.9362329%2C77.60161719999999&key=AIzaSyCW_bHL0gT86obrUrmFFrAMVT326FD6gIU&alternatives=true")
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                Gson gson = new Gson();
+                JSONObject jsonObject = null;
+                JSONArray jRoutes;
+                try {
+                    jsonObject = new JSONObject(response.body().toString());
+                    jRoutes = jsonObject.getJSONArray("routes");
+                    route = gson.fromJson(jRoutes.getJSONObject(0).toString(), Route.class);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Log.e("my_tag", "error is: " + e.getMessage().toString());
+                }
+                parsedJsonData.setText("" + route.getLegs());
+            }
+        });
     }
 
     private void permissionHandle() {
