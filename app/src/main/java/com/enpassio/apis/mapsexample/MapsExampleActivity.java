@@ -14,12 +14,16 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -43,25 +47,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.gson.Gson;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
 
 /* References/resources
  * https://stackoverflow.com/a/33023788   --->> Location listeners
@@ -93,7 +91,12 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     private GoogleMap.OnCameraIdleListener onCameraIdleListener;
     private GoogleMap.OnCameraMoveStartedListener onCameraMoveStartedListener;
     private List<Leg> legsInRoute;
+    //dummy data for route
+    ArrayList<LatLng> listOfPoints;
     private Route route;
+    boolean isMarkerRotating = false;
+    private int currentPt = 0;
+    private Marker mMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +108,16 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         markerLocationNameTextView = findViewById(R.id.location_name_text_view);
         parseJsonButton = findViewById(R.id.parse_json);
         parsedJsonData = findViewById(R.id.parsed_json_data);
+
+        //new location details
+        listOfPoints = new ArrayList<>();
+        listOfPoints.add(new LatLng(12.9172279, 77.61009200000001));
+        listOfPoints.add(new LatLng(12.9215591, 77.61116079999999));
+        listOfPoints.add(new LatLng(12.9346852, 77.60970669999999));
+        listOfPoints.add(new LatLng(12.936785, 77.6036768));
+        listOfPoints.add(new LatLng(12.9369538, 77.60213));
+        listOfPoints.add(new LatLng(12.9362289, 77.6016369));
+
         parseJsonButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -161,7 +174,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
             public void onCameraMoveStarted(int i) {
                 Log.d("my_tagggsss", "onCameraMoveStarted called");
                 if (mMap != null) {
-                    mMap.clear();
+                    //mMap.clear();
                 }
                 markerIconView.setVisibility(View.VISIBLE);
                 mMap.setOnCameraIdleListener(onCameraIdleListener);
@@ -176,28 +189,130 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         Request request = new Request.Builder()
                 .url("https://maps.googleapis.com/maps/api/directions/json?origin=12.9172309%2C77.6100577&destination=12.9362329%2C77.60161719999999&key=AIzaSyCW_bHL0gT86obrUrmFFrAMVT326FD6gIU&alternatives=true")
                 .build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
+        animate();
+//        client.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(Call call, IOException e) {
+//
+//            }
+//
+//            @Override
+//            public void onResponse(Call call, Response response) throws IOException {
+//                Gson gson = new Gson();
+//                JSONObject jsonObject = null;
+//                JSONArray jRoutes;
+//                try {
+//                    jsonObject = new JSONObject(response.body().toString());
+//                    jRoutes = jsonObject.getJSONArray("routes");
+//                    route = gson.fromJson(jRoutes.getJSONObject(0).toString(), Route.class);
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                    Log.e("my_tag", "error is: " + e.getMessage().toString());
+//                }
+//                parsedJsonData.setText("" + route.getLegs());
+//            }
+//        });
+    }
 
-            }
+    private double bearingBetweenLocations(LatLng latLng1, LatLng latLng2) {
 
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                Gson gson = new Gson();
-                JSONObject jsonObject = null;
-                JSONArray jRoutes;
-                try {
-                    jsonObject = new JSONObject(response.body().toString());
-                    jRoutes = jsonObject.getJSONArray("routes");
-                    route = gson.fromJson(jRoutes.getJSONObject(0).toString(), Route.class);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.e("my_tag", "error is: " + e.getMessage().toString());
+        double PI = 3.14159;
+        double lat1 = latLng1.latitude * PI / 180;
+        double long1 = latLng1.longitude * PI / 180;
+        double lat2 = latLng2.latitude * PI / 180;
+        double long2 = latLng2.longitude * PI / 180;
+
+        double dLon = (long2 - long1);
+
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+                * Math.cos(lat2) * Math.cos(dLon);
+
+        double brng = Math.atan2(y, x);
+
+        brng = Math.toDegrees(brng);
+        brng = (brng + 360) % 360;
+
+        return brng;
+    }
+
+    private void animate() {
+        int i = 0;
+        while (i < listOfPoints.size() - 2) {
+            mMap.clear();
+            final LatLng startPosition = new LatLng(listOfPoints.get(i).latitude, listOfPoints.get(i).longitude);
+            mMarker = mMap.addMarker(new MarkerOptions().position(startPosition).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
+            final LatLng finalPosition = new LatLng(listOfPoints.get(i + 1).latitude, listOfPoints.get(i + 1).longitude);
+            double bearing = bearingBetweenLocations(startPosition, new LatLng(finalPosition.latitude, finalPosition.longitude));
+            rotateMarker(mMarker, bearing);
+            final Handler handler = new Handler();
+            final long start = SystemClock.uptimeMillis();
+            final float durationInMs = 3000;
+            final boolean hideMarker = false;
+
+            handler.post(new Runnable() {
+                long elapsed;
+                float t;
+                float v;
+
+                @Override
+                public void run() {
+                    // Calculate progress using interpolator
+                    elapsed = SystemClock.uptimeMillis() - start;
+                    t = elapsed / durationInMs;
+
+                    LatLng currentPosition = new LatLng(
+                            startPosition.latitude * (1 - t) + finalPosition.latitude * t,
+                            startPosition.longitude * (1 - t) + finalPosition.longitude * t);
+
+                    mMarker.setPosition(currentPosition);
+
+                    // Repeat till progress is complete.
+                    if (t < 1) {
+                        // Post again 16ms later.
+                        handler.postDelayed(this, 16);
+                    } else {
+                        if (hideMarker) {
+                            mMarker.setVisible(false);
+                        } else {
+                            mMarker.setVisible(true);
+                        }
+                    }
                 }
-                parsedJsonData.setText("" + route.getLegs());
-            }
-        });
+            });
+            i++;
+        }
+    }
+
+    private void rotateMarker(final Marker marker, final double toRotation) {
+        if (!isMarkerRotating) {
+            final Handler handler = new Handler();
+            final long start = SystemClock.uptimeMillis();
+            final float startRotation = marker.getRotation();
+            final long duration = 1000;
+
+            final Interpolator interpolator = new LinearInterpolator();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    isMarkerRotating = true;
+
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = interpolator.getInterpolation((float) elapsed / duration);
+
+                    float rot = (float) (t * toRotation + (1 - t) * startRotation);
+
+                    marker.setRotation(-rot > 180 ? rot / 2 : rot);
+                    if (t < 1.0) {
+                        // Post again 16ms later.
+                        handler.postDelayed(this, 0);
+                    } else {
+                        isMarkerRotating = false;
+                    }
+                }
+            });
+        }
     }
 
     private void permissionHandle() {
@@ -318,8 +433,8 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
-        mMap.setOnCameraIdleListener(onCameraIdleListener);
-        mMap.setOnCameraMoveStartedListener(onCameraMoveStartedListener);
+//        mMap.setOnCameraIdleListener(onCameraIdleListener);
+//        mMap.setOnCameraMoveStartedListener(onCameraMoveStartedListener);
     }
 
     private void handleCameraMove() {
