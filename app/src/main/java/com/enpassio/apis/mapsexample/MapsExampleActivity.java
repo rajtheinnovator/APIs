@@ -68,6 +68,7 @@ import java.util.Locale;
  * https://stackoverflow.com/a/37048987   --->> Rotate map and car animation
  * https://www.ipragmatech.com/add-custom-image-in-google-maps-marker-android/   --->>Include bounds/markers for proper zooming
  * https://stackoverflow.com/a/36746136   --->> Google maps intent
+ * https://stackoverflow.com/a/13912034   --->> Car animation for single set of source & destination
  * */
 public class MapsExampleActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -88,6 +89,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     //dummy data for route
     ArrayList<LatLng> listOfPoints;
     private Marker mMarker;
+    boolean isMarkerRotating;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,15 +177,14 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     }
 
     private void animateCarMoveAndHandlemarkerRotation() {
-        mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(listOfPoints.get(0).latitude, listOfPoints.get(0).longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
-        final Location sourceLocation = new Location(LocationManager.GPS_PROVIDER);
-        sourceLocation.setLatitude(listOfPoints.get(0).latitude);
-        sourceLocation.setLongitude(listOfPoints.get(0).longitude);
-        final Location targetLocation = new Location(LocationManager.GPS_PROVIDER);
-        targetLocation.setLatitude(listOfPoints.get(1).latitude);
-        targetLocation.setLongitude(listOfPoints.get(1).longitude);
-        animateMarker(mMarker, new LatLng(sourceLocation.getLatitude(), sourceLocation.getLongitude()), new LatLng(targetLocation.getLatitude(), targetLocation.getLongitude()), false);
         mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(listOfPoints.get(1).latitude, listOfPoints.get(1).longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
+        final Location sourceLocation = new Location(LocationManager.GPS_PROVIDER);
+        sourceLocation.setLatitude(listOfPoints.get(2).latitude);
+        sourceLocation.setLongitude(listOfPoints.get(2).longitude);
+        final Location targetLocation = new Location(LocationManager.GPS_PROVIDER);
+        targetLocation.setLatitude(listOfPoints.get(3).latitude);
+        targetLocation.setLongitude(listOfPoints.get(3).longitude);
+        animateMarker(mMarker, new LatLng(sourceLocation.getLatitude(), sourceLocation.getLongitude()), new LatLng(targetLocation.getLatitude(), targetLocation.getLongitude()), false);
     }
 
     public void animateMarker(final Marker marker, final LatLng fromPosition, final LatLng toPosition,
@@ -192,8 +193,10 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
             final Handler handler = new Handler();
             final long start = SystemClock.uptimeMillis();
             final LatLng startLatLng = fromPosition;
-            final long duration = 3000;
+            final long duration = 5000;
             final Interpolator interpolator = new LinearInterpolator();
+            isMarkerRotating = false;
+            rotateMarker(mMarker, bearingBetweenLocations(fromPosition, toPosition));
             handler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -219,6 +222,59 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
                 }
             });
         }
+    }
+
+    private void rotateMarker(final Marker marker, final double toRotation) {
+        if (!isMarkerRotating) {
+            final Handler handler = new Handler();
+            final long start = SystemClock.uptimeMillis();
+            final float startRotation = marker.getRotation();
+            final long duration = 1000;
+
+            final Interpolator interpolator = new LinearInterpolator();
+
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    isMarkerRotating = true;
+
+                    long elapsed = SystemClock.uptimeMillis() - start;
+                    float t = interpolator.getInterpolation((float) elapsed / duration);
+
+                    float rot = (float) (t * toRotation + (1 - t) * startRotation);
+
+                    marker.setRotation(-rot > 180 ? rot / 2 : rot);
+                    if (t < 1.0) {
+                        // Post again 16ms later.
+                        handler.postDelayed(this, 16);
+                    } else {
+                        isMarkerRotating = false;
+                    }
+                }
+            });
+        }
+    }
+
+    private double bearingBetweenLocations(LatLng latLng1, LatLng latLng2) {
+
+        double PI = 3.14159;
+        double lat1 = latLng1.latitude * PI / 180;
+        double long1 = latLng1.longitude * PI / 180;
+        double lat2 = latLng2.latitude * PI / 180;
+        double long2 = latLng2.longitude * PI / 180;
+
+        double dLon = (long2 - long1);
+
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
+                * Math.cos(lat2) * Math.cos(dLon);
+
+        double brng = Math.atan2(y, x);
+
+        brng = Math.toDegrees(brng);
+        brng = (brng + 360) % 360;
+
+        return brng;
     }
 
     private void permissionHandle() {
