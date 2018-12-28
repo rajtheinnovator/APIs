@@ -30,8 +30,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.enpassio.apis.R;
-import com.enpassio.apis.mapsexample.model.Leg;
-import com.enpassio.apis.mapsexample.model.Route;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -87,14 +85,9 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     private TextView parsedJsonData;
     private GoogleMap.OnCameraIdleListener onCameraIdleListener;
     private GoogleMap.OnCameraMoveStartedListener onCameraMoveStartedListener;
-    private List<Leg> legsInRoute;
     //dummy data for route
     ArrayList<LatLng> listOfPoints;
-    private Route route;
-    boolean isMarkerRotating = false;
-    private int currentPt = 0;
     private Marker mMarker;
-    private int i;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,7 +155,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
             @Override
             public void onCameraIdle() {
                 Log.d("my_tagggsss", "onCameraIdle called");
-                //handleCameraMove();
+                handleCameraMove();
                 mMap.setOnCameraIdleListener(null);
                 mMap.setOnCameraMoveStartedListener(onCameraMoveStartedListener);
             }
@@ -172,7 +165,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
             public void onCameraMoveStarted(int i) {
                 Log.d("my_tagggsss", "onCameraMoveStarted called");
                 if (mMap != null) {
-                    //mMap.clear();
+                    mMap.clear();
                 }
                 markerIconView.setVisibility(View.VISIBLE);
                 mMap.setOnCameraIdleListener(onCameraIdleListener);
@@ -182,33 +175,15 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     }
 
     private void animateCarMoveAndHandlemarkerRotation() {
-        i = 0;
-        mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(listOfPoints.get(i).latitude, listOfPoints.get(i).longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
-        while (i < listOfPoints.size() - 2) {
-            final Handler handler = new Handler();
-            //Code to move car along static latitude and longitude
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    //post again
-
-                    Location sourceLocation = new Location(LocationManager.GPS_PROVIDER);
-                    sourceLocation.setLatitude(listOfPoints.get(i).latitude);
-                    sourceLocation.setLongitude(listOfPoints.get(i).longitude);
-                    Location targetLocation = new Location(LocationManager.GPS_PROVIDER);
-                    targetLocation.setLatitude(listOfPoints.get(i + 1).latitude);
-                    targetLocation.setLongitude(listOfPoints.get(i + 1).longitude);
-                    animateMarkerNew(sourceLocation, targetLocation, mMarker);
-                    mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(listOfPoints.get(i + 1).latitude, listOfPoints.get(i + 1).longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
-                    i++;
-                }
-            }, 3000);
-            i++;
-        }
-    }
-
-    private void animateMarkerNew(final Location source, final Location destination, final Marker marker) {
-        animateMarker(marker, new LatLng(source.getLatitude(), source.getLongitude()), new LatLng(destination.getLatitude(), destination.getLongitude()), false);
+        mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(listOfPoints.get(0).latitude, listOfPoints.get(0).longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
+        final Location sourceLocation = new Location(LocationManager.GPS_PROVIDER);
+        sourceLocation.setLatitude(listOfPoints.get(0).latitude);
+        sourceLocation.setLongitude(listOfPoints.get(0).longitude);
+        final Location targetLocation = new Location(LocationManager.GPS_PROVIDER);
+        targetLocation.setLatitude(listOfPoints.get(1).latitude);
+        targetLocation.setLongitude(listOfPoints.get(1).longitude);
+        animateMarker(mMarker, new LatLng(sourceLocation.getLatitude(), sourceLocation.getLongitude()), new LatLng(targetLocation.getLatitude(), targetLocation.getLongitude()), false);
+        mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(listOfPoints.get(1).latitude, listOfPoints.get(1).longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
     }
 
     public void animateMarker(final Marker marker, final LatLng fromPosition, final LatLng toPosition,
@@ -217,10 +192,8 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
             final Handler handler = new Handler();
             final long start = SystemClock.uptimeMillis();
             final LatLng startLatLng = fromPosition;
-            final long duration = 500;
-
+            final long duration = 3000;
             final Interpolator interpolator = new LinearInterpolator();
-
             handler.post(new Runnable() {
                 @Override
                 public void run() {
