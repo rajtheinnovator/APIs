@@ -94,6 +94,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
     boolean isMarkerRotating = false;
     private int currentPt = 0;
     private Marker mMarker;
+    private int i;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,7 +162,7 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
             @Override
             public void onCameraIdle() {
                 Log.d("my_tagggsss", "onCameraIdle called");
-                handleCameraMove();
+                //handleCameraMove();
                 mMap.setOnCameraIdleListener(null);
                 mMap.setOnCameraMoveStartedListener(onCameraMoveStartedListener);
             }
@@ -180,101 +181,67 @@ public class MapsExampleActivity extends FragmentActivity implements OnMapReadyC
         };
     }
 
-    private double bearingBetweenLocations(LatLng latLng1, LatLng latLng2) {
-
-        double PI = 3.14159;
-        double lat1 = latLng1.latitude * PI / 180;
-        double long1 = latLng1.longitude * PI / 180;
-        double lat2 = latLng2.latitude * PI / 180;
-        double long2 = latLng2.longitude * PI / 180;
-
-        double dLon = (long2 - long1);
-
-        double y = Math.sin(dLon) * Math.cos(lat2);
-        double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1)
-                * Math.cos(lat2) * Math.cos(dLon);
-
-        double brng = Math.atan2(y, x);
-
-        brng = Math.toDegrees(brng);
-        brng = (brng + 360) % 360;
-
-        return brng;
-    }
-
     private void animateCarMoveAndHandlemarkerRotation() {
-        int i = 0;
+        i = 0;
+        mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(listOfPoints.get(i).latitude, listOfPoints.get(i).longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
         while (i < listOfPoints.size() - 2) {
-            mMap.clear();
-            final LatLng startPosition = new LatLng(listOfPoints.get(i).latitude, listOfPoints.get(i).longitude);
-            mMarker = mMap.addMarker(new MarkerOptions().position(startPosition).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
-            final LatLng finalPosition = new LatLng(listOfPoints.get(i + 1).latitude, listOfPoints.get(i + 1).longitude);
-            double bearing = bearingBetweenLocations(startPosition, new LatLng(finalPosition.latitude, finalPosition.longitude));
-            rotateMarker(mMarker, bearing);
             final Handler handler = new Handler();
-            final long start = SystemClock.uptimeMillis();
-            final float durationInMs = 3000;
-            final boolean hideMarker = false;
-
-            handler.post(new Runnable() {
-                long elapsed;
-                float t;
-                float v;
-
+            //Code to move car along static latitude and longitude
+            handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    // Calculate progress using interpolator
-                    elapsed = SystemClock.uptimeMillis() - start;
-                    t = elapsed / durationInMs;
+                    //post again
 
-                    LatLng currentPosition = new LatLng(
-                            startPosition.latitude * (1 - t) + finalPosition.latitude * t,
-                            startPosition.longitude * (1 - t) + finalPosition.longitude * t);
-
-                    mMarker.setPosition(currentPosition);
-
-                    // Repeat till progress is complete.
-                    if (t < 1) {
-                        // Post again 16ms later.
-                        handler.postDelayed(this, 16);
-                    } else {
-                        if (hideMarker) {
-                            mMarker.setVisible(false);
-                        } else {
-                            mMarker.setVisible(true);
-                        }
-                    }
+                    Location sourceLocation = new Location(LocationManager.GPS_PROVIDER);
+                    sourceLocation.setLatitude(listOfPoints.get(i).latitude);
+                    sourceLocation.setLongitude(listOfPoints.get(i).longitude);
+                    Location targetLocation = new Location(LocationManager.GPS_PROVIDER);
+                    targetLocation.setLatitude(listOfPoints.get(i + 1).latitude);
+                    targetLocation.setLongitude(listOfPoints.get(i + 1).longitude);
+                    animateMarkerNew(sourceLocation, targetLocation, mMarker);
+                    mMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(listOfPoints.get(i + 1).latitude, listOfPoints.get(i + 1).longitude)).icon(BitmapDescriptorFactory.fromResource(R.drawable.icon_car)));
+                    i++;
                 }
-            });
+            }, 3000);
             i++;
         }
     }
 
-    private void rotateMarker(final Marker marker, final double toRotation) {
-        if (!isMarkerRotating) {
+    private void animateMarkerNew(final Location source, final Location destination, final Marker marker) {
+        animateMarker(marker, new LatLng(source.getLatitude(), source.getLongitude()), new LatLng(destination.getLatitude(), destination.getLongitude()), false);
+    }
+
+    public void animateMarker(final Marker marker, final LatLng fromPosition, final LatLng toPosition,
+                              final boolean hideMarker) {
+        if (mMap != null) {
             final Handler handler = new Handler();
             final long start = SystemClock.uptimeMillis();
-            final float startRotation = marker.getRotation();
-            final long duration = 1000;
+            final LatLng startLatLng = fromPosition;
+            final long duration = 500;
 
             final Interpolator interpolator = new LinearInterpolator();
 
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    isMarkerRotating = true;
-
                     long elapsed = SystemClock.uptimeMillis() - start;
-                    float t = interpolator.getInterpolation((float) elapsed / duration);
+                    float t = interpolator.getInterpolation((float) elapsed
+                            / duration);
+                    double lng = t * toPosition.longitude + (1 - t)
+                            * startLatLng.longitude;
+                    double lat = t * toPosition.latitude + (1 - t)
+                            * startLatLng.latitude;
+                    marker.setPosition(new LatLng(lat, lng));
 
-                    float rot = (float) (t * toRotation + (1 - t) * startRotation);
-
-                    marker.setRotation(-rot > 180 ? rot / 2 : rot);
                     if (t < 1.0) {
                         // Post again 16ms later.
-                        handler.postDelayed(this, 0);
+                        handler.postDelayed(this, 16);
                     } else {
-                        isMarkerRotating = false;
+                        if (hideMarker) {
+                            marker.setVisible(false);
+                        } else {
+                            marker.setVisible(true);
+                        }
                     }
                 }
             });
