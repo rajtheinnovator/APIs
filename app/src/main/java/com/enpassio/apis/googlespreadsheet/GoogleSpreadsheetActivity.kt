@@ -22,11 +22,11 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
         setContentView(R.layout.activity_google_spreadsheet)
         val settings = getSharedPreferences("token", Context.MODE_PRIVATE)
         val token = settings.getString("token", "")!!
-        getListOfMail(token)
+        getListOfSpreadsheets(token)
     }
 
 
-    private fun getListOfMail(token: String) {
+    private fun getListOfSpreadsheets(token: String) {
         val tokenForUser = token
         val listSpreadsheetService = ServiceGenerator.createService(ListSpreadsheetService::class.java, tokenForUser)
         val listSpreadsheetCall = listSpreadsheetService.getSpreadsheetList("application/vnd.google-apps.spreadsheet", DRIVE_SCOPE,
@@ -57,7 +57,7 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
 
     private fun callForSingleSpreadsheetData(id: String?, token: String) {
         val spreadsheetService = SpreadsheetServiceGenerator.createService(SpreadsheetService::class.java, token)
-        val spreadsheetCall = spreadsheetService.getSpreadsheetData(id.toString(), "A1:Z")
+        val spreadsheetCall = spreadsheetService.getSpreadsheetData("10uRokjEVBWRdE7wHas_An5nXFU01tO_kuZzWjQbIJBI", "A1:Z")
         spreadsheetCall.enqueue(object : Callback<ValueRange> {
             override fun onFailure(call: Call<ValueRange>, t: Throwable) {
                 Log.e("my_taggsss", "single error is: " + t.message)
@@ -73,13 +73,6 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
                         }
                     }
                 }
-//                Log.v("my_taggsss", "token inside spreadsheet data received is: " + token)
-//                Log.v("my_taggsss", "Spreadsheet data received is: " + spreadsheet)
-//                Log.v("my_taggsss", "response.errorBody() is: " + response.errorBody())
-//                Log.v("my_taggsss", "response.message() is: " + response.message())
-//                Log.v("my_taggsss", "response.code() is: " + response.code())
-//                Log.v("my_taggsss", "response.headers() is: " + response.headers())
-//                Log.v("my_taggsss", "response.raw() is: " + response.raw())
             }
         })
     }
