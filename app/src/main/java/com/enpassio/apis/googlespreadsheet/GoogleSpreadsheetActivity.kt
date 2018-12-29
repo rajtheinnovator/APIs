@@ -1,30 +1,125 @@
 package com.enpassio.apis.googlespreadsheet
 
 import android.content.Context
-import android.os.Bundle
+import android.os.*
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.widget.Button
+import android.widget.Toast
 import com.enpassio.apis.BuildConfig
 import com.enpassio.apis.R
 import com.enpassio.apis.ServiceGenerator
 import com.enpassio.apis.googlespreadsheet.model.ListSpreadsheet
 import com.enpassio.apis.googlespreadsheet.model.ValueRange
+import jxl.Workbook
+import jxl.WorkbookSettings
+import jxl.write.Label
+import jxl.write.WritableWorkbook
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.io.*
+import java.util.*
+
 
 class GoogleSpreadsheetActivity : AppCompatActivity() {
 
     private val DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly   https://www.googleapis.com/auth/spreadsheets.readonly"
-
+    var myExternalFile: File? = null
+    var myData = ""
+    var file: File? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_google_spreadsheet)
         val settings = getSharedPreferences("token", Context.MODE_PRIVATE)
         val token = settings.getString("token", "")!!
-        getListOfSpreadsheets(token)
+        //getListOfSpreadsheets(token)
+        val writeData = findViewById<Button>(R.id.write_data)
+        val readData: Button = findViewById(R.id.read_data)
+        writeData.setOnClickListener {
+            val handler = Handler(Looper.getMainLooper())
+
+            handler.postDelayed({
+                // Run your task here
+                createAndHandleExcelSpreadsheetFile()
+            }, 1000)
+        }
+        readData.setOnClickListener {
+
+            val handler = Handler(Looper.getMainLooper())
+
+            handler.postDelayed({
+                // Run your task here
+                readDataFromSpreadsheet()
+            }, 1000)
+        }
     }
 
+    private fun readDataFromSpreadsheet() {
+        try {
+            val fis = FileInputStream(file)
+            val `in` = DataInputStream(fis)
+            val br = BufferedReader(InputStreamReader(`in`))
+            var strLine = ""
+            while ((strLine.equals(br.readLine())) != null) {
+                myData = myData + strLine
+            }
+            `in`.close()
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+        Log.d("my_tag", "data fetched from file is: " + myData)
+    }
+
+    private fun createAndHandleExcelSpreadsheetFile() {
+        val sd = Environment.getExternalStorageDirectory();
+        val csvFile = "myData.xls";
+
+        val directory = File(sd.getAbsolutePath());
+        //create directory if not exist
+        if (!directory.isDirectory()) {
+            directory.mkdirs();
+        }
+        //define workbook settings
+
+        try {
+            //file path
+            file = File(directory, csvFile)
+            val wbSettings = WorkbookSettings()
+            wbSettings.locale = Locale("en", "EN")
+            val workbook: WritableWorkbook
+            workbook = Workbook.createWorkbook(file, wbSettings)
+
+            //Excel sheet name. 0 represents first sheet
+            val sheet = workbook.createSheet("propel response", 0)
+            // column and row
+            sheet.addCell(Label(0, 0, "UserName"))
+            sheet.addCell(Label(1, 0, "PhoneNumber"))
+            sheet.addCell(Label(0, 1, "Abhishek Raj"))
+            sheet.addCell(Label(1, 1, "8870048900"))
+            workbook.write();
+            workbook.close();
+            Toast.makeText(getApplication(),
+                    "Data Exported in a Excel Sheet", Toast.LENGTH_SHORT).show();
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.d("my_tag", "error in workbook setup: " + e.message)
+        }
+    }
+
+    private fun isExternalStorageReadOnly(): Boolean {
+        val extStorageState = Environment.getExternalStorageState()
+        return if (Environment.MEDIA_MOUNTED_READ_ONLY == extStorageState) {
+            true
+        } else false
+    }
+
+    private fun isExternalStorageAvailable(): Boolean {
+        val extStorageState = Environment.getExternalStorageState()
+        return if (Environment.MEDIA_MOUNTED == extStorageState) {
+            true
+        } else false
+    }
 
     private fun getListOfSpreadsheets(token: String) {
         val tokenForUser = token
@@ -75,5 +170,26 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private inner class LongOperation : AsyncTask<String, Void, String>() {
+
+        override fun doInBackground(vararg params: String): String {
+            myData = ""
+            if (params.get(0).equals("write")) {
+                createAndHandleExcelSpreadsheetFile()
+            } else {
+                readDataFromSpreadsheet()
+            }
+            return myData
+        }
+
+        override fun onPostExecute(result: String) {
+            Log.d("my_tag", "data fetched from file is: " + result)
+        }
+
+        override fun onPreExecute() {}
+
+        override fun onProgressUpdate(vararg values: Void) {}
     }
 }
