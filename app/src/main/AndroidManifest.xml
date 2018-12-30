@@ -60,7 +60,12 @@
 
         <activity android:name=".googlespreadsheet.GoogleSpreadsheetActivity" />
         <activity android:name=".mapsexample.MapsExampleActivity" />
-        <activity android:name=".googlespreadsheet.WriteToExternalStorage"></activity>
+        <activity
+            android:name=".googlespreadsheet.WriteToExternalStorage"
+            android:parentActivityName=".googlespreadsheet.GoogleSpreadsheetActivity" />
+        <activity
+            android:name=".googlespreadsheet.NextActivityToReadData"
+            android:parentActivityName=".googlespreadsheet.WriteToExternalStorage" />
     </application>
 
 </manifest>
