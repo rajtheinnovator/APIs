@@ -1,6 +1,7 @@
 package com.enpassio.apis.googlespreadsheet
 
 import android.content.Context
+import android.content.Intent
 import android.os.*
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -36,6 +37,8 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
         //getListOfSpreadsheets(token)
         val writeData = findViewById<Button>(R.id.write_data)
         val readData: Button = findViewById(R.id.read_data)
+        val writeToExternalStorageButton: Button = findViewById(R.id.write_to_external_storage_button)
+        writeToExternalStorageButton.setOnClickListener { startActivityWriteToExternalActivity() }
         writeData.setOnClickListener {
             val handler = Handler(Looper.getMainLooper())
 
@@ -53,6 +56,10 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
                 readDataFromSpreadsheet()
             }, 1000)
         }
+    }
+
+    private fun startActivityWriteToExternalActivity() {
+        startActivity(Intent(this@GoogleSpreadsheetActivity, WriteToExternalStorage::class.java))
     }
 
     private fun readDataFromSpreadsheet() {
