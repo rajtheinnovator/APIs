@@ -24,9 +24,9 @@
         android:id="@+id/write_data"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="136dp"
-        android:layout_marginRight="136dp"
+        android:layout_marginTop="52dp"
+        android:layout_marginEnd="140dp"
+        android:layout_marginRight="140dp"
         android:text="Write data"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_view_spreadsheet_data" />
@@ -44,7 +44,6 @@
         android:text="Read data"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.526"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/write_data"
         app:layout_constraintVertical_bias="0.0" />

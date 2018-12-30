@@ -41,19 +41,25 @@ public class WriteToExternalStorage extends AppCompatActivity {
         saveTextPrivatelyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                savePrivate();
+                if (isPermissionGranted) {
+                    savePrivate();
+                }
             }
         });
         saveTextPubliclyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                savePublic();
+                if (isPermissionGranted) {
+                    savePublic();
+                }
             }
         });
         goToReadActivity.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                next();
+                if (isPermissionGranted) {
+                    next();
+                }
             }
         });
         checkReadWritePermission();
