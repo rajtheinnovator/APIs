@@ -26,7 +26,7 @@ import retrofit2.Response
 import java.io.*
 import java.util.*
 
-
+//Java Excel ibrary reference for spreadsheet: https://www.studytutorial.in/android-export-sqlite-data-into-excel-sheet-xls-using-java-excel-library
 class GoogleSpreadsheetActivity : AppCompatActivity() {
 
     private val DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.readonly   https://www.googleapis.com/auth/spreadsheets.readonly"
@@ -52,7 +52,7 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
             handler.postDelayed({
                 // Run your task here
                 checkReadWritePermission()
-                createAndHandleExcelSpreadsheetFile()
+                createAndHandleExcelSpreadsheetFileJavaExcelLibrary()
             }, 1000)
         }
         readData.setOnClickListener {
@@ -135,7 +135,7 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
         Log.d("my_tag", "data fetched from file is: " + myData)
     }
 
-    private fun createAndHandleExcelSpreadsheetFile() {
+    private fun createAndHandleExcelSpreadsheetFileJavaExcelLibrary() {
         val sd = Environment.getExternalStorageDirectory();
         val csvFile = "myData.xls";
 
@@ -241,7 +241,7 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
         override fun doInBackground(vararg params: String): String {
             myData = ""
             if (params.get(0).equals("write")) {
-                createAndHandleExcelSpreadsheetFile()
+                createAndHandleExcelSpreadsheetFileJavaExcelLibrary()
             } else {
                 readDataFromSpreadsheet()
             }
