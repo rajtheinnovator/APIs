@@ -5,9 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.*
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
@@ -16,13 +13,6 @@ import com.enpassio.apis.R
 import com.enpassio.apis.ServiceGenerator
 import com.enpassio.apis.googlespreadsheet.model.ListSpreadsheet
 import com.enpassio.apis.googlespreadsheet.model.ValueRange
-import jxl.Workbook
-import jxl.WorkbookSettings
-import jxl.write.Label
-import jxl.write.WritableWorkbook
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.*
 import java.util.*
 
@@ -46,6 +36,10 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
         val readData: Button = findViewById(R.id.read_data)
         val writeToExternalStorageButton: Button = findViewById(R.id.write_to_external_storage_button)
         writeToExternalStorageButton.setOnClickListener { startActivityWriteToExternalActivity() }
+
+        val createAndReadSpreadsheetUsingApachePOI: Button = findViewById(R.id.apache_poi_button)
+        createAndReadSpreadsheetUsingApachePOI.setOnClickListener { startActivityCreateAndReadSpreadsheetUsingApachePOI() }
+
         writeData.setOnClickListener {
             val handler = Handler(Looper.getMainLooper())
 
@@ -66,6 +60,10 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
                 }
             }, 1000)
         }
+    }
+
+    private fun startActivityCreateAndReadSpreadsheetUsingApachePOI() {
+        startActivity(Intent(this@GoogleSpreadsheetActivity, CreateAndReadSpreadsheetUsingApachePOI::class.java))
     }
 
     fun checkReadWritePermission(): Boolean {
