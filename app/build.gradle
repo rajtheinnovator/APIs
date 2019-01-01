@@ -80,6 +80,8 @@ dependencies {
     //Java Excel dependency
     implementation files('libs/jxl.jar')
     //Apache POI Excel dependency
-    implementation "org.apache.poi:poi:3.17"
-    implementation "org.apache.poi:poi-ooxml:3.17"
+//    implementation "org.apache.poi:poi:3.17"
+//    implementation "org.apache.poi:poi-ooxml:3.17"
+    //Jar file taken from: https://github.com/centic9/poi-on-android/releases
+    implementation files('libs/poishadow-all.jar')
 }
