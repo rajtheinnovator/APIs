@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.enpassio.apis.R;
 import com.enpassio.apis.googlespreadsheet.model.Employee;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -17,12 +18,16 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
 
 //Code referenced from: https://www.callicoder.com/java-write-excel-file-apache-poi/
 public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
@@ -42,7 +47,9 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         writeDataButton = findViewById(R.id.write_data_to_spreadsheet_button);
         readDataButton = findViewById(R.id.read_data_from_spreadsheet_button);
         spreadsheetDataTextView = findViewById(R.id.spreadsheet_data_text_view);
-
+//        System.setProperty("javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
+//        System.setProperty("javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
+//        System.setProperty("javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
         writeDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -52,9 +59,44 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         readDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                try {
+                    modifyExistingWorkbook();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InvalidFormatException e) {
+                    e.printStackTrace();
+                }
             }
         });
+    }
+
+    private void modifyExistingWorkbook() throws IOException, InvalidFormatException {
+        // Obtain a workbook from the excel file
+        Workbook workbook = WorkbookFactory.create(new File("poi-generated-file.xlsx"));
+
+        // Get Sheet at index 0
+        Sheet sheet = workbook.getSheetAt(0);
+
+        // Get Row at index 1
+        Row row = sheet.getRow(1);
+
+        // Get the Cell at index 2 from the above row
+        Cell cell = row.getCell(2);
+
+        // Create the cell if it doesn't exist
+        if (cell == null)
+            cell = row.createCell(2);
+
+        // Update the cell's value
+        cell.setCellValue("Updated Value");
+
+        // Write the output to the file
+        FileOutputStream fileOut = new FileOutputStream("poi-generated-file.xlsx");
+        workbook.write(fileOut);
+        fileOut.close();
+
+        // Closing the workbook
+        workbook.close();
     }
 
     private void createWorkbookFromAvailableData() {
@@ -113,7 +155,8 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
 
         // Resize all columns to fit the content size
         for (int i = 0; i < columns.length; i++) {
-            sheet.autoSizeColumn(i);
+            //refer to: https://stackoverflow.com/a/37070120
+            sheet.setColumnWidth(i, 14);
         }
 
         // Write the output to a file

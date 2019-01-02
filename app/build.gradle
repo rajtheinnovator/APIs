@@ -27,6 +27,17 @@ android {
         it.buildConfigField "String", "SPREADSHEET_API_KEY", sheetsApiKey
         it.buildConfigField "String", "MAPS_API_KEY", mapsApiKey
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+    }
 }
 
 dependencies {
@@ -78,10 +89,21 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
     implementation 'com.google.android.gms:play-services-location:16.0.0'
     //Java Excel dependency
-    implementation files('libs/jxl.jar')
+//    implementation files('libs/jxl.jar')
+    //Jar for Apache POI referenced from: https://github.com/andruhon/android5xlsx
+    implementation files('libs/poi-3.12-android-a.jar')
+    implementation files('libs/poi-ooxml-schemas-3.12-20150511-a.jar')
     //Apache POI Excel dependency
 //    implementation "org.apache.poi:poi:3.17"
-//    implementation "org.apache.poi:poi-ooxml:3.17"
-    //Jar file taken from: https://github.com/centic9/poi-on-android/releases
-    implementation files('libs/poishadow-all.jar')
+//    implementation ("org.apache.poi:poi-ooxml:3.17")
+//
+//    // https://mvnrepository.com/artifact/org.apache.poi/poi
+//    implementation group: 'org.apache.poi', name: 'poi', version: '4.0.0'
+//
+//    // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+//    implementation (group: 'org.apache.poi', name: 'poi-ooxml', version: '4.0.1'){
+//          exclude group: 'stax', module: 'stax-api'
+//      }
+//    //Jar file taken from: https://github.com/centic9/poi-on-android/releases
+//    implementation files('libs/poishadow-all.jar')
 }
