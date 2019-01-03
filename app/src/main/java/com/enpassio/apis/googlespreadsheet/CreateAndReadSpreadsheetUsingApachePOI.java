@@ -9,18 +9,6 @@ import android.widget.TextView;
 import com.enpassio.apis.R;
 import com.enpassio.apis.googlespreadsheet.model.Employee;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,7 +17,9 @@ import java.util.Calendar;
 import java.util.List;
 
 
-//Code referenced from: https://www.callicoder.com/java-write-excel-file-apache-poi/
+// Code referenced from:
+// https://www.callicoder.com/java-write-excel-file-apache-poi/
+// https://stackoverflow.com/questions/30968735/using-com-bea-xml-stream-package-on-android
 public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
 
     private static String[] columns = {"Name", "Email", "Date Of Birth", "Salary"};
