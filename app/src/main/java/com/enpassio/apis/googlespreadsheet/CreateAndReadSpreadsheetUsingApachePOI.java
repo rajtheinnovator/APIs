@@ -9,6 +9,18 @@ import android.widget.TextView;
 import com.enpassio.apis.R;
 import com.enpassio.apis.googlespreadsheet.model.Employee;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,13 +45,11 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_and_read_spreadsheet_using_apache_poi);
 
-        setupDataForSpreadsheet();
         writeDataButton = findViewById(R.id.write_data_to_spreadsheet_button);
         readDataButton = findViewById(R.id.read_data_from_spreadsheet_button);
         spreadsheetDataTextView = findViewById(R.id.spreadsheet_data_text_view);
-//        System.setProperty("javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
-//        System.setProperty("javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
-//        System.setProperty("javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
+
+        setupDataForSpreadsheet();
         writeDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

@@ -1,8 +1,54 @@
-apply plugin: 'java-library'
-
+plugins {
+    id 'java' // java plugin must be explicitly applied for shadow plugin
+    id 'com.github.johnrengelman.shadow'
+}
+/*
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 }
+*/
+sourceCompatibility = 1.7
 
-sourceCompatibility = "8"
-targetCompatibility = "8"
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.apache.poi:poi-ooxml:3.17'
+    /*
+    compile ('org.apache.poi:poi-ooxml:3.17') {
+        exclude group: 'stax', module: 'stax-api'
+    }
+    */
+    compile 'com.fasterxml:aalto-xml:1.0.0'
+}
+
+shadowJar {
+    exclude 'repackage/**'
+
+    exclude 'LICENSE.txt'
+    exclude 'NOTICE.txt'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/LICENSE.txt'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/NOTICE.txt'
+    exclude 'META-INF/maven/**'
+
+    // these are only needed when handling Visio files, remove it if you would like to use Visio support
+    dependencies {
+        exclude(dependency('com.github.virtuald:curvesapi'))
+        exclude(dependency('commons-codec:commons-codec'))
+        exclude(dependency('commons-codec:commons-collections4'))
+    }
+
+    // Relocate javax dependencies so Android does not choke
+    relocate 'javax.xml.namespace', 'org.apache.poi.javax.xml.namespace'
+    relocate 'javax.xml.stream', 'org.apache.poi.javax.xml.stream'
+    relocate 'javax.xml.XMLConstants', 'org.apache.poi.javax.xml.XMLConstants'
+    // java.awt is not available, but class Color is used in APIs in POI, therefore
+    // relocate this class to another one where we can include a rewrite
+    relocate 'java.awt.Color', 'org.apache.poi.java.awt.Color'
+}
+
+jar.dependsOn shadowJar
+test.dependsOn shadowJar
