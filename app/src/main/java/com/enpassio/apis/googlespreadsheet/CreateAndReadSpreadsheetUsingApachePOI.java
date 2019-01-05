@@ -1,7 +1,9 @@
 package com.enpassio.apis.googlespreadsheet;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -39,11 +41,17 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
     Button writeDataButton;
     Button readDataButton;
     TextView spreadsheetDataTextView;
+    // Write the output to a file
+    FileOutputStream fileOut;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_and_read_spreadsheet_using_apache_poi);
+
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLInputFactory", "com.fasterxml.aalto.stax.InputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
+        System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
 
         writeDataButton = findViewById(R.id.write_data_to_spreadsheet_button);
         readDataButton = findViewById(R.id.read_data_from_spreadsheet_button);
@@ -53,7 +61,11 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         writeDataButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                createWorkbookFromAvailableData();
+                try {
+                    createWorkbookFromAvailableData();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
         readDataButton.setOnClickListener(new View.OnClickListener() {
@@ -99,13 +111,16 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         workbook.close();
     }
 
-    private void createWorkbookFromAvailableData() {
+    private void createWorkbookFromAvailableData() throws IOException {
         // Create a Workbook
+        File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);// Folder Name
+        File myFile = new File(folder, "poi-generated-file.xlsx");// Filename
         Workbook workbook = new XSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file
 
         /* CreationHelper helps us create instances of various things like DataFormat,
            Hyperlink, RichTextString etc, in a format (HSSF, XSSF) independent way */
         CreationHelper createHelper = workbook.getCreationHelper();
+
 
         // Create a Sheet
         Sheet sheet = workbook.createSheet("Employee");
@@ -113,7 +128,7 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         // Create a Font for styling header cells
         Font headerFont = workbook.createFont();
         headerFont.setBold(true);
-        headerFont.setFontHeightInPoints((short) 14);
+        headerFont.setFontHeightInPoints((short) 8);
         headerFont.setColor(IndexedColors.RED.getIndex());
 
         // Create a CellStyle with the font
@@ -136,37 +151,38 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
 
         // Create Other rows and cells with employees data
         int rowNum = 1;
+        Log.d("my_tagggg", "employees size is: " + employees.size());
         for (Employee employee : employees) {
             Row row = sheet.createRow(rowNum++);
 
             row.createCell(0)
                     .setCellValue(employee.getName());
-
+            Log.d("my_tagggg", "cell " + 0 + " row" + rowNum + " value is: " + employee.getName());
             row.createCell(1)
                     .setCellValue(employee.getEmail());
-
+            Log.d("my_tagggg", "cell " + 1 + " row" + rowNum + " value is: " + employee.getEmail());
             Cell dateOfBirthCell = row.createCell(2);
             dateOfBirthCell.setCellValue(employee.getDateOfBirth());
             dateOfBirthCell.setCellStyle(dateCellStyle);
-
+            Log.d("my_tagggg", "cell " + 2 + " row" + rowNum + " value is: " + employee.getDateOfBirth());
             row.createCell(3)
                     .setCellValue(employee.getSalary());
+            Log.d("my_tagggg", "cell " + 3 + " row" + rowNum + " value is: " + employee.getSalary());
         }
 
         // Resize all columns to fit the content size
         for (int i = 0; i < columns.length; i++) {
             //refer to: https://stackoverflow.com/a/37070120
-            sheet.setColumnWidth(i, 14);
+            sheet.setColumnWidth(7, 10);
         }
 
-        // Write the output to a file
-        FileOutputStream fileOut = null;
         try {
-            fileOut = new FileOutputStream("poi-generated-file.xlsx");
+            fileOut = new FileOutputStream(myFile);
             workbook.write(fileOut);
-            fileOut.close();
             // Closing the workbook
+            fileOut.close();
             workbook.close();
+
         } catch (java.io.IOException e) {
             e.printStackTrace();
         }
