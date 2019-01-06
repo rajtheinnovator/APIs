@@ -14,6 +14,7 @@ import com.enpassio.apis.googlespreadsheet.model.Employee;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -83,29 +84,32 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
     }
 
     private void modifyExistingWorkbook() throws IOException, InvalidFormatException {
+
+        File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS); // Folder Name
+        File myFile = new File(folder, "poi-generated-file.xlsx"); // Filename
+
         // Obtain a workbook from the excel file
-        Workbook workbook = WorkbookFactory.create(new File("poi-generated-file.xlsx"));
+        Workbook workbook = WorkbookFactory.create(myFile);
 
         // Get Sheet at index 0
         Sheet sheet = workbook.getSheetAt(0);
 
-        // Get Row at index 1
-        Row row = sheet.getRow(1);
+        String data = "";
+        for (int i = 0; i < sheet.getPhysicalNumberOfRows(); i++) {
+            // Get Row at index 1
+            Row row = sheet.getRow(i);
+            for (int j = 0; j < row.getLastCellNum(); j++) {
 
-        // Get the Cell at index 2 from the above row
-        Cell cell = row.getCell(2);
-
-        // Create the cell if it doesn't exist
-        if (cell == null)
-            cell = row.createCell(2);
-
-        // Update the cell's value
-        cell.setCellValue("Updated Value");
-
-        // Write the output to the file
-        FileOutputStream fileOut = new FileOutputStream("poi-generated-file.xlsx");
-        workbook.write(fileOut);
-        fileOut.close();
+                Cell currentCell = row.getCell(j);
+                if (currentCell.getCellTypeEnum() == CellType.STRING) {
+                    data += currentCell.getStringCellValue() + " __ ";
+                } else if (currentCell.getCellTypeEnum() == CellType.NUMERIC) {
+                    data += currentCell.getNumericCellValue() + " __ ";
+                }
+            }
+            data += "\n \n \n";
+        }
+        spreadsheetDataTextView.setText(data);
 
         // Closing the workbook
         workbook.close();
@@ -191,6 +195,30 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
 
     private void setupDataForSpreadsheet() {
         Calendar dateOfBirth = Calendar.getInstance();
+        dateOfBirth.set(1992, 7, 21);
+        employees.add(new Employee("Rajeev Singh", "rajeev@example.com",
+                dateOfBirth.getTime(), 1200000.0));
+
+        dateOfBirth.set(1965, 10, 15);
+        employees.add(new Employee("Thomas cook", "thomas@example.com",
+                dateOfBirth.getTime(), 1500000.0));
+
+        dateOfBirth.set(1987, 4, 18);
+        employees.add(new Employee("Steve Maiden", "steve@example.com",
+                dateOfBirth.getTime(), 1800000.0));
+        //second set of data
+        dateOfBirth.set(1992, 7, 21);
+        employees.add(new Employee("Rajeev Singh", "rajeev@example.com",
+                dateOfBirth.getTime(), 1200000.0));
+
+        dateOfBirth.set(1965, 10, 15);
+        employees.add(new Employee("Thomas cook", "thomas@example.com",
+                dateOfBirth.getTime(), 1500000.0));
+
+        dateOfBirth.set(1987, 4, 18);
+        employees.add(new Employee("Steve Maiden", "steve@example.com",
+                dateOfBirth.getTime(), 1800000.0));
+        //third set of data
         dateOfBirth.set(1992, 7, 21);
         employees.add(new Employee("Rajeev Singh", "rajeev@example.com",
                 dateOfBirth.getTime(), 1200000.0));
