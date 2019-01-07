@@ -77,11 +77,19 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
     }
 
     private fun startActivityCreateAndReadSpreadsheetUsingApachePOI() {
-        val intent = Intent(this@GoogleSpreadsheetActivity, CreateAndReadSpreadsheetUsingApachePOI::class.java)
         if (valueRange != null && (valueRange?.values?.isNotEmpty()!!)) {
-            intent.putExtra("valueRange", valueRange)
+            val intent = Intent(this@GoogleSpreadsheetActivity, CreateAndReadSpreadsheetUsingApachePOI::class.java)
+            val valueRangeBundle = Bundle()
+            valueRangeBundle.putString("key", "value")
+            valueRangeBundle.putParcelable("value_extras", valueRange)
+            for (i in 0 until valueRange?.values!!.size) {
+                if (valueRange?.values!![i].size > 0) {
+                    Log.v("my_taggsss", "Inside sending part Spreadsheet data value is: " + valueRange?.values!![i])
+                }
+            }
+            intent.putExtra("value_range_bundle", valueRangeBundle)
+            startActivity(intent)
         }
-        startActivity(intent)
     }
 
     fun checkReadWritePermission(): Boolean {

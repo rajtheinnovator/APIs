@@ -56,24 +56,33 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
         System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
 
-        if (getIntent().hasExtra("valueRange")) {
-            valueRange = getIntent().getParcelableExtra("valueRange");
-            if (valueRange.getValues() != null) {
-                Log.d("my_taggsss", "valueRange.getValues() is not null");
-                for (int i = 0; i < valueRange.getValues().size(); i++) {
-                    if (valueRange.getValues().get(i).size() > 0) {
-                        Log.v("my_taggsss", "Inside getIntent Spreadsheet data value is: " + valueRange.getValues().get(i));
-                    }
+        Bundle bundle = getIntent().getBundleExtra("value_range_bundle");
+        ValueRange valueRange1 = bundle.getParcelable("value_extras");
+        Log.d("my_taggsss", "value is :" + bundle.getString("key"));
+        Log.d("my_taggsss", "valueRange1 is :" + valueRange1);
+//        Log.d("my_taggsss", "valueRange1.getValues() is :" + valueRange1.getValues());
+//
+//        List<List<String>> value = valueRange1.getValues();
+//        Log.d("my_tag", "value is: " + value + " and size is: " + value.size());
+
+        valueRange = getIntent().getExtras().getParcelable("value_extras");
+        Log.d("my_taggsss", "valueRange.getValues() is :" + valueRange.getValues());
+        if (valueRange != null && valueRange.getValues() != null) {
+            Log.d("my_taggsss", "valueRange.getValues() is not null");
+            for (int i = 0; i < valueRange.getValues().size(); i++) {
+                if (valueRange.getValues().get(i).size() > 0) {
+                    Log.v("my_taggsss", "Inside getIntent Spreadsheet data value is: " + valueRange.getValues().get(i));
                 }
-                try {
-                    createWorkbookFromAvailableData();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                Log.d("my_taggsss", "valueRange.getValues() is NULL");
             }
+            try {
+                createWorkbookFromAvailableData();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.d("my_taggsss", "valueRange.getValues() is NULL");
         }
+
         writeDataButton = findViewById(R.id.write_data_to_spreadsheet_button);
         readDataButton = findViewById(R.id.read_data_from_spreadsheet_button);
         spreadsheetDataTextView = findViewById(R.id.spreadsheet_data_text_view);
