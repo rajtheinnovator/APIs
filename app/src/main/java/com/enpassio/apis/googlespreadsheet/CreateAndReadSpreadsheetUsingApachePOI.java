@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.enpassio.apis.R;
 import com.enpassio.apis.googlespreadsheet.model.Employee;
+import com.enpassio.apis.googlespreadsheet.model.ValueRange;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -44,6 +45,7 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
     TextView spreadsheetDataTextView;
     // Write the output to a file
     FileOutputStream fileOut;
+    private ValueRange valueRange;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,24 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
         System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
 
+        if (getIntent().hasExtra("valueRange")) {
+            valueRange = getIntent().getParcelableExtra("valueRange");
+            if (valueRange.getValues() != null) {
+                Log.d("my_taggsss", "valueRange.getValues() is not null");
+                for (int i = 0; i < valueRange.getValues().size(); i++) {
+                    if (valueRange.getValues().get(i).size() > 0) {
+                        Log.v("my_taggsss", "Inside getIntent Spreadsheet data value is: " + valueRange.getValues().get(i));
+                    }
+                }
+                try {
+                    createWorkbookFromAvailableData();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                Log.d("my_taggsss", "valueRange.getValues() is NULL");
+            }
+        }
         writeDataButton = findViewById(R.id.write_data_to_spreadsheet_button);
         readDataButton = findViewById(R.id.read_data_from_spreadsheet_button);
         spreadsheetDataTextView = findViewById(R.id.spreadsheet_data_text_view);
@@ -142,37 +162,58 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         // Create a Row
         Row headerRow = sheet.createRow(0);
 
+//        // Create cells
+//        for (int i = 0; i < columns.length; i++) {
+//            Cell cell = headerRow.createCell(i);
+//            cell.setCellValue(columns[i]);
+//            cell.setCellStyle(headerCellStyle);
+//        }
         // Create cells
-        for (int i = 0; i < columns.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(columns[i]);
-            cell.setCellStyle(headerCellStyle);
+        if (valueRange.getValues() != null && valueRange.getValues().size() > 0) {
+            List<String> headerCells = valueRange.getValues().get(0);
+            for (int i = 0; i < headerCells.size(); i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headerCells.get(i));
+                cell.setCellStyle(headerCellStyle);
+            }
+        }
+        //creating other rows
+        if (valueRange.getValues() != null && valueRange.getValues().size() > 0) {
+            for (int i = 1; i < valueRange.getValues().size(); i++) {
+                // Create cells
+                List<String> currentCell = valueRange.getValues().get(i);
+                Row row = sheet.createRow(i);
+                for (int j = 0; j < currentCell.size(); j++) {
+                    row.createCell(j)
+                            .setCellValue(currentCell.get(j));
+                }
+            }
         }
 
-        // Create Cell Style for formatting Date
-        CellStyle dateCellStyle = workbook.createCellStyle();
-        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
-
-        // Create Other rows and cells with employees data
-        int rowNum = 1;
-        Log.d("my_tagggg", "employees size is: " + employees.size());
-        for (Employee employee : employees) {
-            Row row = sheet.createRow(rowNum++);
-
-            row.createCell(0)
-                    .setCellValue(employee.getName());
-            Log.d("my_tagggg", "cell " + 0 + " row" + rowNum + " value is: " + employee.getName());
-            row.createCell(1)
-                    .setCellValue(employee.getEmail());
-            Log.d("my_tagggg", "cell " + 1 + " row" + rowNum + " value is: " + employee.getEmail());
-            Cell dateOfBirthCell = row.createCell(2);
-            dateOfBirthCell.setCellValue(employee.getDateOfBirth());
-            dateOfBirthCell.setCellStyle(dateCellStyle);
-            Log.d("my_tagggg", "cell " + 2 + " row" + rowNum + " value is: " + employee.getDateOfBirth());
-            row.createCell(3)
-                    .setCellValue(employee.getSalary());
-            Log.d("my_tagggg", "cell " + 3 + " row" + rowNum + " value is: " + employee.getSalary());
-        }
+//        // Create Cell Style for formatting Date
+//        CellStyle dateCellStyle = workbook.createCellStyle();
+//        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+//
+////        // Create Other rows and cells with employees data
+////        int rowNum = 1;
+////        Log.d("my_tagggg", "employees size is: " + employees.size());
+////        for (Employee employee : employees) {
+////            Row row = sheet.createRow(rowNum++);
+////
+////            row.createCell(0)
+////                    .setCellValue(employee.getName());
+////            Log.d("my_tagggg", "cell " + 0 + " row" + rowNum + " value is: " + employee.getName());
+////            row.createCell(1)
+////                    .setCellValue(employee.getEmail());
+////            Log.d("my_tagggg", "cell " + 1 + " row" + rowNum + " value is: " + employee.getEmail());
+////            Cell dateOfBirthCell = row.createCell(2);
+////            dateOfBirthCell.setCellValue(employee.getDateOfBirth());
+////            dateOfBirthCell.setCellStyle(dateCellStyle);
+////            Log.d("my_tagggg", "cell " + 2 + " row" + rowNum + " value is: " + employee.getDateOfBirth());
+////            row.createCell(3)
+////                    .setCellValue(employee.getSalary());
+////            Log.d("my_tagggg", "cell " + 3 + " row" + rowNum + " value is: " + employee.getSalary());
+////        }
 
         // Resize all columns to fit the content size
         for (int i = 0; i < columns.length; i++) {

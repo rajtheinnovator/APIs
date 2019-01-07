@@ -35,17 +35,21 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
     var file: File? = null
     private val MY_PERMISSIONS_REQUEST_READ_WRITE_STORAGE = 101
     private var isPermissionGranted = false
+    var valueRange: ValueRange? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_google_spreadsheet)
         val settings = getSharedPreferences("token", Context.MODE_PRIVATE)
         val token = settings.getString("token", "")!!
-        //getListOfSpreadsheets(token)
+        getListOfSpreadsheets(token)
         val writeData = findViewById<Button>(R.id.write_data)
         val readData: Button = findViewById(R.id.read_data)
         val writeToExternalStorageButton: Button = findViewById(R.id.write_to_external_storage_button)
         writeToExternalStorageButton.setOnClickListener { startActivityWriteToExternalActivity() }
+
+        val passSpreadsheetDataTakenFromGoogleApiToCreateSpreadsheet: Button = findViewById(R.id.pass_google_spreadsheet_data)
+        passSpreadsheetDataTakenFromGoogleApiToCreateSpreadsheet.setOnClickListener { startActivityCreateAndReadSpreadsheetUsingApachePOI() }
 
         val createAndReadSpreadsheetUsingApachePOI: Button = findViewById(R.id.apache_poi_button)
         createAndReadSpreadsheetUsingApachePOI.setOnClickListener { startActivityCreateAndReadSpreadsheetUsingApachePOI() }
@@ -73,7 +77,11 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
     }
 
     private fun startActivityCreateAndReadSpreadsheetUsingApachePOI() {
-        startActivity(Intent(this@GoogleSpreadsheetActivity, CreateAndReadSpreadsheetUsingApachePOI::class.java))
+        val intent = Intent(this@GoogleSpreadsheetActivity, CreateAndReadSpreadsheetUsingApachePOI::class.java)
+        if (valueRange != null && (valueRange?.values?.isNotEmpty()!!)) {
+            intent.putExtra("valueRange", valueRange)
+        }
+        startActivity(intent)
     }
 
     fun checkReadWritePermission(): Boolean {
@@ -231,9 +239,9 @@ class GoogleSpreadsheetActivity : AppCompatActivity() {
             }
 
             override fun onResponse(call: Call<ValueRange>, response: Response<ValueRange>) {
-                val valueRange = response.body()
+                valueRange = response.body()
                 if (valueRange?.values != null) {
-                    for (singleValue in valueRange.values!!) {
+                    for (singleValue in valueRange?.values!!) {
                         if (singleValue.size > 0) {
                             Log.v("my_taggsss", "Spreadsheet data value is: " + singleValue)
 
