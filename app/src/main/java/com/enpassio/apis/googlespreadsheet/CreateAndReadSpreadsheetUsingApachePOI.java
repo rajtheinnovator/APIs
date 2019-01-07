@@ -45,7 +45,8 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
     TextView spreadsheetDataTextView;
     // Write the output to a file
     FileOutputStream fileOut;
-    private ValueRange valueRange;
+    ValueRange valueRange = new ValueRange();
+    private List<List<String>> listList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,31 +57,11 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         System.setProperty("org.apache.poi.javax.xml.stream.XMLOutputFactory", "com.fasterxml.aalto.stax.OutputFactoryImpl");
         System.setProperty("org.apache.poi.javax.xml.stream.XMLEventFactory", "com.fasterxml.aalto.stax.EventFactoryImpl");
 
-        Bundle bundle = getIntent().getBundleExtra("value_range_bundle");
-        ValueRange valueRange1 = bundle.getParcelable("value_extras");
-        Log.d("my_taggsss", "value is :" + bundle.getString("key"));
-        Log.d("my_taggsss", "valueRange1 is :" + valueRange1);
-//        Log.d("my_taggsss", "valueRange1.getValues() is :" + valueRange1.getValues());
-//
-//        List<List<String>> value = valueRange1.getValues();
-//        Log.d("my_tag", "value is: " + value + " and size is: " + value.size());
-
         valueRange = getIntent().getExtras().getParcelable("value_extras");
-        Log.d("my_taggsss", "valueRange.getValues() is :" + valueRange.getValues());
-        if (valueRange != null && valueRange.getValues() != null) {
-            Log.d("my_taggsss", "valueRange.getValues() is not null");
-            for (int i = 0; i < valueRange.getValues().size(); i++) {
-                if (valueRange.getValues().get(i).size() > 0) {
-                    Log.v("my_taggsss", "Inside getIntent Spreadsheet data value is: " + valueRange.getValues().get(i));
-                }
-            }
-            try {
-                createWorkbookFromAvailableData();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            Log.d("my_taggsss", "valueRange.getValues() is NULL");
+        try {
+            createWorkbookFromAvailableData();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         writeDataButton = findViewById(R.id.write_data_to_spreadsheet_button);
@@ -189,16 +170,26 @@ public class CreateAndReadSpreadsheetUsingApachePOI extends AppCompatActivity {
         //creating other rows
         if (valueRange.getValues() != null && valueRange.getValues().size() > 0) {
             for (int i = 1; i < valueRange.getValues().size(); i++) {
+                if (valueRange.getValues().get(i).size() > 0) {
+                    Log.v("my_taggsss", "Inside ROW Spreadsheet data value is: " + valueRange.getValues().get(i));
+                }
                 // Create cells
                 List<String> currentCell = valueRange.getValues().get(i);
                 Row row = sheet.createRow(i);
                 for (int j = 0; j < currentCell.size(); j++) {
                     row.createCell(j)
                             .setCellValue(currentCell.get(j));
+                    if (valueRange.getValues().get(i).size() > 0) {
+                        Log.v("my_taggsss", "Inside COLUMN Spreadsheet data value is: " + valueRange.getValues().get(i));
+                    }
                 }
             }
         }
-
+//        for (int i = 0; i < valueRange.getValues().size(); i++) {
+//            if (valueRange.getValues().get(i).size() > 0) {
+//                Log.v("my_taggsss", "Inside getIntent Spreadsheet data value is: " + valueRange.getValues().get(i));
+//            }
+//        }
 //        // Create Cell Style for formatting Date
 //        CellStyle dateCellStyle = workbook.createCellStyle();
 //        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd-MM-yyyy"));
